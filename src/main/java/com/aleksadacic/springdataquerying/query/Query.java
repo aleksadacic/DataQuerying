@@ -1,14 +1,19 @@
-package com.aleksadacic.springdataquerying;
+package com.aleksadacic.springdataquerying.query;
 
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.util.List;
+
 public class Query<T> {
+    //TODO distinct
+    //TODO da se brisu 1=1 statementi da bi tool delovao ozbiljnije
     private Specification<T> specification;
 
     private Query() {
-        this.specification = Specification.where(null);
+        this.specification = new SpecificationWrapper<>(null);
     }
 
     public static <T> Query<T> get() {
@@ -104,5 +109,37 @@ public class Query<T> {
     public Specification<T> buildSpecification() {
         return specification;
     }
-    //TODO null, not null
+
+    // Builds and returns a Specification<T> that can be used with repository.findAll
+    public Specification<T> buildSpecification(String[] selectedFields) {
+        return (root, query, criteriaBuilder) -> {
+            // Apply the existing specification if any conditions are defined
+            if (specification != null) {
+                Predicate predicate = specification.toPredicate(root, query, criteriaBuilder);
+                query.where(predicate);
+            }
+
+            SpecificationEngine.applySelection(root, query, List.of(selectedFields));
+
+            return query.getRestriction(); // Return the restriction (predicate) built so far
+        };
+    }
+
+    // Method to execute the query with EntityManager
+    public List<Object[]> executeQuery(EntityManager entityManager, Class<T> entityType, String[] selectedFields) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Object[]> criteriaQuery = criteriaBuilder.createQuery(Object[].class);
+        Root<T> root = criteriaQuery.from(entityType);
+
+        // Apply the specification to build predicates and select fields
+        if (specification != null) {
+            Predicate predicate = specification.toPredicate(root, criteriaQuery, criteriaBuilder);
+            criteriaQuery.where(predicate);
+        }
+
+        // Create a SpecificationWrapper with the selected fields and apply them
+        SpecificationEngine.applySelection(root, criteriaQuery, List.of(selectedFields));
+        TypedQuery<Object[]> query = entityManager.createQuery(criteriaQuery);
+        return query.getResultList();
+    }
 }

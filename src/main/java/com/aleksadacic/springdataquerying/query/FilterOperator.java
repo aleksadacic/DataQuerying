@@ -1,4 +1,4 @@
-package com.aleksadacic.springdataquerying;
+package com.aleksadacic.springdataquerying.query;
 
 public enum FilterOperator {
     EQ,

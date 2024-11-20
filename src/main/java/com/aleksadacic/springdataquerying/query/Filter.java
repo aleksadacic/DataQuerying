@@ -1,4 +1,4 @@
-package com.aleksadacic.springdataquerying;
+package com.aleksadacic.springdataquerying.query;
 
 import lombok.Getter;
 import lombok.Setter;

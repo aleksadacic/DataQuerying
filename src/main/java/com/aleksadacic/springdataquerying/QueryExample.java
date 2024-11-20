@@ -1,5 +1,6 @@
 package com.aleksadacic.springdataquerying;
 
+import com.aleksadacic.springdataquerying.data.*;
 import com.aleksadacic.springdataquerying.query.FilterOperator;
 
 import java.util.Arrays;

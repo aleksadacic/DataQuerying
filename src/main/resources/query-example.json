@@ -1,0 +1,65 @@
+{
+  "filters": [
+    {
+      "field": "name",
+      "value": "John",
+      "operator": "LIKE",
+      "type": "STRING"
+    },
+    {
+      "field": "status",
+      "value": ["ACTIVE", "PENDING"],
+      "operator": "IN",
+      "type": "ARRAY"
+    }
+  ],
+  "conditionGroups": [
+    {
+      "filters": [
+        {
+          "field": "age",
+          "value": 18,
+          "operator": "GTE",
+          "type": "NUMBER"
+        },
+        {
+          "field": "age",
+          "value": 65,
+          "operator": "LTE",
+          "type": "NUMBER"
+        }
+      ],
+      "logicalOperator": "AND"
+    },
+    {
+      "filters": [
+        {
+          "field": "createdDate",
+          "value": ["2023-01-01", "2023-12-31"],
+          "operator": "BETWEEN",
+          "type": "DATE"
+        }
+      ],
+      "nestedGroups": [
+        {
+          "filters": [
+            {
+              "field": "isVerified",
+              "value": true,
+              "operator": "EQ",
+              "type": "BOOLEAN"
+            },
+            {
+              "field": "lastLoginDate",
+              "value": "2023-05-01",
+              "operator": "GTE",
+              "type": "DATE"
+            }
+          ],
+          "logicalOperator": "OR"
+        }
+      ],
+      "logicalOperator": "OR"
+    }
+  ]
+}

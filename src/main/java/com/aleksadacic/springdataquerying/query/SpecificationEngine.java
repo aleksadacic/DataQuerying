@@ -1,9 +1,6 @@
-package com.aleksadacic.springdataquerying;
+package com.aleksadacic.springdataquerying.query;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.Path;
-import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -14,10 +11,16 @@ class SpecificationEngine {
     }
 
     public static Predicate eq(Filter filter, CriteriaBuilder criteriaBuilder, Path<?> fieldPath) {
+        if (filter.getValue() == null) {
+            return criteriaBuilder.isNull(fieldPath);
+        }
         return criteriaBuilder.equal(fieldPath, filter.getValue());
     }
 
     public static Predicate notEq(Filter filter, CriteriaBuilder criteriaBuilder, Path<?> fieldPath) {
+        if (filter.getValue() == null) {
+            return criteriaBuilder.isNotNull(fieldPath);
+        }
         return criteriaBuilder.notEqual(fieldPath, filter.getValue());
     }
 
@@ -85,5 +88,13 @@ class SpecificationEngine {
                 fieldPath,
                 (Comparable) filter.getValue()
         );
+    }
+
+    // Utility method to apply the selected fields to the CriteriaQuery
+    public static <T> void applySelection(Root<T> root, CriteriaQuery<?> query, List<String> selectedFields) {
+        if (selectedFields != null && !selectedFields.isEmpty()) {
+            query.multiselect(selectedFields.stream()
+                    .map(root::get).toArray(Selection[]::new));
+        }
     }
 }
