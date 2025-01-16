@@ -4,6 +4,7 @@ import com.aleksadacic.springdataquerying.data.*;
 import com.aleksadacic.springdataquerying.query.FilterOperator;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class QueryExample {
     public static void main(String[] args) {
@@ -33,7 +34,7 @@ public class QueryExample {
         filter3.setType(DataType.DATE);
 
         ConditionGroup group2 = new ConditionGroup();
-        group2.setFilters(Arrays.asList(filter3));
+        group2.setFilters(List.of(filter3));
         group2.setLogicalOperator(LogicalOperator.AND);
 
         // Combine condition groups in the main QueryData
