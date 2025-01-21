@@ -1,16 +1,17 @@
 package com.aleksadacic.springdataquerying.query;
 
+import com.aleksadacic.springdataquerying.utils.GenericConverter;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Query<T> {
-    //TODO distinct
-    //TODO da se brisu 1=1 statementi da bi tool delovao ozbiljnije
     private Specification<T> specification;
+    private boolean distinct = false;
 
     private Query() {
         this.specification = new SpecificationWrapper<>(null);
@@ -73,63 +74,78 @@ public class Query<T> {
         return this;
     }
 
-    // Adds a join condition
+    // Adds a join condition (handles both simple and nested joins)
     public Query<T> join(String joinAttribute, JoinType joinType) {
         Specification<T> joinSpec = (root, query, criteriaBuilder) -> {
-            root.join(joinAttribute, joinType);
-            return criteriaBuilder.conjunction(); // Return an always-true predicate
-        };
-        this.specification = this.specification.and(joinSpec);
-        return this;
-    }
-
-    // Method to perform a nested join
-    public Query<T> nestedJoin(String path, JoinType joinType) {
-        Specification<T> joinSpec = (root, query, criteriaBuilder) -> {
-            String[] attributes = path.split("\\.");
+            String[] attributes = joinAttribute.split("\\.");
             Join<?, ?> join = null;
 
-            // Iterate through each attribute in the path
+            // Perform the join(s)
             for (int i = 0; i < attributes.length; i++) {
                 if (i == 0) {
-                    // The first attribute joins directly from the root
+                    // First part joins directly from the root
                     join = root.join(attributes[i], joinType);
                 } else {
-                    // Subsequent attributes join from the previous join
+                    // Subsequent parts join from the previous join
                     join = join.join(attributes[i], joinType);
                 }
             }
 
-            return criteriaBuilder.conjunction(); // Return an always-true predicate
+            // Return null to avoid adding unnecessary predicates
+            return null;
         };
-        this.specification = this.specification.and(joinSpec);
+
+        this.specification = this.specification == null
+                ? joinSpec
+                : this.specification.and(joinSpec);
+
+        return this;
+    }
+
+    public Query<T> distinct() {
+        this.distinct = true;
         return this;
     }
 
     public Specification<T> buildSpecification() {
-        return specification;
-    }
-
-    // Builds and returns a Specification<T> that can be used with repository.findAll
-    public Specification<T> buildSpecification(String[] selectedFields) {
         return (root, query, criteriaBuilder) -> {
-            // Apply the existing specification if any conditions are defined
-            if (specification != null) {
-                Predicate predicate = specification.toPredicate(root, query, criteriaBuilder);
-                query.where(predicate);
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (this.distinct) {
+                query.distinct(true);
             }
 
-            SpecificationEngine.applySelection(root, query, List.of(selectedFields));
+            // Collect predicates from the specification
+            if (specification != null) {
+                Predicate predicate = specification.toPredicate(root, query, criteriaBuilder);
+                if (predicate != null && isNonTrivialPredicate(predicate, criteriaBuilder)) {
+                    predicates.add(predicate);
+                }
+            }
+            // Combine predicates if they are not empty
+            if (!predicates.isEmpty()) {
+                query.where(criteriaBuilder.and(predicates.toArray(new Predicate[0])));
+            }
 
-            return query.getRestriction(); // Return the restriction (predicate) built so far
+            return query.getRestriction();
         };
     }
 
+    // Utility method to check if a predicate is trivial
+    private boolean isNonTrivialPredicate(Predicate predicate, CriteriaBuilder criteriaBuilder) {
+        // `criteriaBuilder.conjunction()` translates to 1=1
+        return predicate == null || !predicate.equals(criteriaBuilder.conjunction());
+    }
+
     // Method to execute the query with EntityManager
-    public List<Object[]> executeQuery(EntityManager entityManager, Class<T> entityType, String[] selectedFields) {
+    public <R> List<R> executeQuery(EntityManager entityManager, Class<T> entityType, String[] selectedFields, Class<R> returnType) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> criteriaQuery = criteriaBuilder.createQuery(Object[].class);
         Root<T> root = criteriaQuery.from(entityType);
+
+        if (this.distinct) {
+            criteriaQuery.distinct(true);
+        }
 
         // Apply the specification to build predicates and select fields
         if (specification != null) {
@@ -140,6 +156,6 @@ public class Query<T> {
         // Create a SpecificationWrapper with the selected fields and apply them
         SpecificationEngine.applySelection(root, criteriaQuery, List.of(selectedFields));
         TypedQuery<Object[]> query = entityManager.createQuery(criteriaQuery);
-        return query.getResultList();
+        return GenericConverter.convertToList(query.getResultList(), returnType);
     }
 }

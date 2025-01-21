@@ -4,7 +4,7 @@ import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
 class SpecificationWrapper<T> implements Specification<T> {
-    private final Filter filter;
+    private final transient Filter filter;
 
     public SpecificationWrapper(Filter filter) {
         this.filter = filter;
@@ -12,12 +12,9 @@ class SpecificationWrapper<T> implements Specification<T> {
 
     @Override
     public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-        if (filter == null) {
-            return criteriaBuilder.conjunction();
-        }
-
-        if (isFilterInvalid()) {
-            throw new IllegalArgumentException("Attribute cannot be null and value cannot be null unless the operation is EQ or NOT_EQ.");
+        if (filter == null || isFilterInvalid()) {
+            // Return null to avoid adding trivial predicates
+            return null;
         }
 
         Path<?> fieldPath = getPath(root, filter.getAttribute());
