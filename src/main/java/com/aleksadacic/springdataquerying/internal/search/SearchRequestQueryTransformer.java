@@ -1,8 +1,9 @@
-package com.aleksadacic.springdataquerying.search;
+package com.aleksadacic.springdataquerying.internal.search;
 
-import com.aleksadacic.springdataquerying.enums.ConditionalOperator;
-import com.aleksadacic.springdataquerying.enums.SearchOperator;
-import com.aleksadacic.springdataquerying.query.Query;
+import com.aleksadacic.springdataquerying.api.Query;
+import com.aleksadacic.springdataquerying.api.SearchOperator;
+import com.aleksadacic.springdataquerying.api.SearchRequest;
+import com.aleksadacic.springdataquerying.internal.enums.ConditionalOperator;
 import jakarta.persistence.criteria.JoinType;
 
 import java.util.List;
@@ -12,13 +13,6 @@ public class SearchRequestQueryTransformer {
     private SearchRequestQueryTransformer() {
     }
 
-    /**
-     * Transforms the given SearchRequest into a Query object.
-     *
-     * @param <T>     The entity type.
-     * @param request The SearchRequest containing all filters.
-     * @return A Query object containing all converted filters.
-     */
     public static <T> Query<T> toQuery(SearchRequest<T> request) {
         // Start with an empty Query
         Query<T> query = Query.get();
@@ -30,10 +24,8 @@ public class SearchRequestQueryTransformer {
 
         return query;
     }
-
-    /**
-     * Recursively processes the list of filters and appends them to the Query.
-     */
+    
+    // Recursively processes the list of filters and appends them to the Query.
     private static <T> void processFilters(Query<T> query,
                                            List<FilterData> filters,
                                            ConditionalOperator groupOperator) {

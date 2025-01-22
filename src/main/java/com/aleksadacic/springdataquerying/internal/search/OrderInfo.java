@@ -1,5 +1,6 @@
-package com.aleksadacic.springdataquerying.search;
+package com.aleksadacic.springdataquerying.internal.search;
 
+import com.aleksadacic.springdataquerying.internal.enums.SortOrder;
 import lombok.Data;
 
 @Data

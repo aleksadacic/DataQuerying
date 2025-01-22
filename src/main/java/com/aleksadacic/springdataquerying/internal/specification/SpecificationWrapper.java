@@ -1,12 +1,10 @@
-package com.aleksadacic.springdataquerying.query;
+package com.aleksadacic.springdataquerying.internal.specification;
 
-import com.aleksadacic.springdataquerying.enums.SearchOperator;
-import com.aleksadacic.springdataquerying.exceptions.AttributeNotFoundException;
-import com.aleksadacic.springdataquerying.query.utils.SpecUtils;
+import com.aleksadacic.springdataquerying.api.SearchOperator;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
-class SpecificationWrapper<T> implements Specification<T> {
+public class SpecificationWrapper<T> implements Specification<T> {
     private final transient Filter filter;
 
     public SpecificationWrapper(Filter filter) {

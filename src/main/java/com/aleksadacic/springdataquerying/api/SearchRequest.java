@@ -1,6 +1,10 @@
-package com.aleksadacic.springdataquerying.search;
+package com.aleksadacic.springdataquerying.api;
 
-import com.aleksadacic.springdataquerying.enums.ConditionalOperator;
+import com.aleksadacic.springdataquerying.internal.enums.ConditionalOperator;
+import com.aleksadacic.springdataquerying.internal.search.FilterData;
+import com.aleksadacic.springdataquerying.internal.search.OrderInfo;
+import com.aleksadacic.springdataquerying.internal.search.PageInfo;
+import com.aleksadacic.springdataquerying.internal.search.SearchRequestQueryTransformer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,6 +28,12 @@ public class SearchRequest<T> {
     @JsonIgnore
     public Specification<T> getSpecification() {
         return SearchRequestQueryTransformer.toQuery(this).buildSpecification();
+    }
+
+    @SuppressWarnings("unused")
+    @JsonIgnore
+    public Query<T> getQuery() {
+        return SearchRequestQueryTransformer.toQuery(this);
     }
 
     @SuppressWarnings("unused")

@@ -1,6 +1,6 @@
-package com.aleksadacic.springdataquerying.utils;
+package com.aleksadacic.springdataquerying.internal.utils;
 
-import com.aleksadacic.springdataquerying.exceptions.MappingException;
+import com.aleksadacic.springdataquerying.api.exceptions.MappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.lang.reflect.Field;

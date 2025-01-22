@@ -1,11 +1,11 @@
-package com.aleksadacic.springdataquerying.query;
+package com.aleksadacic.springdataquerying.internal.specification;
 
 import jakarta.persistence.criteria.*;
 
 import java.util.Collection;
 import java.util.List;
 
-class SpecificationEngine {
+public class SpecificationEngine {
 
     private SpecificationEngine() {
     }

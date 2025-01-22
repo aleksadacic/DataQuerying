@@ -1,4 +1,4 @@
-package com.aleksadacic.springdataquerying.exceptions;
+package com.aleksadacic.springdataquerying.api.exceptions;
 
 public class SpecificationBuilderException extends RuntimeException {
     public SpecificationBuilderException(String s) {

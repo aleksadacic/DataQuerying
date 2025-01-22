@@ -1,8 +1,8 @@
-package com.aleksadacic.springdataquerying.search;
+package com.aleksadacic.springdataquerying.internal.search;
 
-import com.aleksadacic.springdataquerying.enums.ConditionalOperator;
-import com.aleksadacic.springdataquerying.enums.DataType;
-import com.aleksadacic.springdataquerying.enums.SearchOperator;
+import com.aleksadacic.springdataquerying.internal.enums.ConditionalOperator;
+import com.aleksadacic.springdataquerying.internal.enums.DataType;
+import com.aleksadacic.springdataquerying.api.SearchOperator;
 import lombok.Getter;
 import lombok.Setter;
 

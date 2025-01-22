@@ -1,7 +1,9 @@
-package com.aleksadacic.springdataquerying.query;
+package com.aleksadacic.springdataquerying.api;
 
-import com.aleksadacic.springdataquerying.enums.SearchOperator;
-import com.aleksadacic.springdataquerying.utils.GenericConverter;
+import com.aleksadacic.springdataquerying.internal.specification.Filter;
+import com.aleksadacic.springdataquerying.internal.specification.SpecificationEngine;
+import com.aleksadacic.springdataquerying.internal.specification.SpecificationWrapper;
+import com.aleksadacic.springdataquerying.internal.utils.GenericConverter;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
@@ -10,6 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class Query<T> {
     private Specification<T> specification;
     private boolean distinct = false;
@@ -110,6 +113,8 @@ public class Query<T> {
 
     public Specification<T> buildSpecification() {
         return (root, query, criteriaBuilder) -> {
+            if (query == null) return null;
+
             List<Predicate> predicates = new ArrayList<>();
 
             if (this.distinct) {

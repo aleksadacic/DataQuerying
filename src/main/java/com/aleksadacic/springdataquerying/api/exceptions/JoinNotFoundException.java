@@ -1,4 +1,4 @@
-package com.aleksadacic.springdataquerying.exceptions;
+package com.aleksadacic.springdataquerying.api.exceptions;
 
 public class JoinNotFoundException extends SpecificationBuilderException {
     public JoinNotFoundException(String join) {

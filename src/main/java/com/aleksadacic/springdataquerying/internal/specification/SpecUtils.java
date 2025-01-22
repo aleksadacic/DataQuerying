@@ -1,12 +1,12 @@
-package com.aleksadacic.springdataquerying.query.utils;
+package com.aleksadacic.springdataquerying.internal.specification;
 
-import com.aleksadacic.springdataquerying.exceptions.AttributeNotFoundException;
-import com.aleksadacic.springdataquerying.exceptions.JoinNotFoundException;
+import com.aleksadacic.springdataquerying.api.exceptions.AttributeNotFoundException;
+import com.aleksadacic.springdataquerying.api.exceptions.JoinNotFoundException;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
 
-public class SpecUtils {
+class SpecUtils {
     private SpecUtils() {
     }
 
