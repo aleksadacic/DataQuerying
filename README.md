@@ -73,7 +73,7 @@ dependencies {
 An ***enum*** defining different comparison operators (e.g., `EQ`, `NOT_EQ`, `GTE`, `LTE`, `IN`, `LIKE`, etc.) This is
 part of the *public API* and can be referenced directly when building queries.
 
-```ajava
+```java
 public enum SearchOperator {
     EQ,
     NOT_EQ,
