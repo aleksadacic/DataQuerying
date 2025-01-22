@@ -1,5 +1,8 @@
 package com.aleksadacic.springdataquerying.query;
 
+import com.aleksadacic.springdataquerying.enums.SearchOperator;
+import com.aleksadacic.springdataquerying.exceptions.AttributeNotFoundException;
+import com.aleksadacic.springdataquerying.query.utils.SpecUtils;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -10,6 +13,7 @@ class SpecificationWrapper<T> implements Specification<T> {
         this.filter = filter;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
         if (filter == null || isFilterInvalid()) {
@@ -17,7 +21,7 @@ class SpecificationWrapper<T> implements Specification<T> {
             return null;
         }
 
-        Path<?> fieldPath = getPath(root, filter.getAttribute());
+        Path<?> fieldPath = SpecUtils.getPath(root, filter.getAttribute());
         return switch (filter.getOperator()) {
             case EQ -> SpecificationEngine.eq(filter, criteriaBuilder, fieldPath);
             case NOT_EQ -> SpecificationEngine.notEq(filter, criteriaBuilder, fieldPath);
@@ -35,37 +39,6 @@ class SpecificationWrapper<T> implements Specification<T> {
 
     private boolean isFilterInvalid() {
         return filter.getAttribute() == null ||
-                (filter.getValue() == null && (filter.getOperator() != FilterOperator.EQ && filter.getOperator() != FilterOperator.NOT_EQ));
-    }
-
-    //TODO utils
-    // Utility method to retrieve the correct Path based on attribute
-    private Path<?> getPath(Root<T> root, String attribute) {
-        if (attribute.contains(".")) {
-            String[] parts = attribute.split("\\.");
-            Join<?, ?> join = root.getJoins().stream()
-                    .filter(e -> e.getAttribute().getName().equals(parts[0]))
-                    .findFirst()
-                    .orElse(null);
-            if (join == null) {
-                throw new IllegalArgumentException("Join not found for attribute: " + parts[0]);
-            }
-
-            Path<?> path = join;
-            for (int i = 1; i < parts.length; i++) {
-                path = path.get(parts[i]);
-            }
-            return path;
-        } else {
-            return root.get(attribute);
-        }
-    }
-
-    //TODO utils
-    private static <T> Join<?, ?> getJoinByName(Root<T> root, String joinName) {
-        return root.getJoins().stream()
-                .filter(join -> join.getAttribute().getName().equals(joinName))
-                .findFirst()
-                .orElse(null); // or throw an exception if you prefer
+                (filter.getValue() == null && (filter.getOperator() != SearchOperator.EQ && filter.getOperator() != SearchOperator.NOT_EQ));
     }
 }

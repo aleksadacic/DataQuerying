@@ -1,7 +1,7 @@
-package com.aleksadacic.springdataquerying.query;
+package com.aleksadacic.springdataquerying.enums;
 
 //TODO enum encapsulation for errors (pentest)
-public enum FilterOperator {
+public enum SearchOperator {
     EQ,
     NOT_EQ,
     GTE,

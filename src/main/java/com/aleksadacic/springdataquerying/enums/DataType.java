@@ -1,4 +1,4 @@
-package com.aleksadacic.springdataquerying.data;
+package com.aleksadacic.springdataquerying.enums;
 
 //TODO enum encapsulation for errors (pentest)
 public enum DataType {

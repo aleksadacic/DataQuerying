@@ -1,5 +1,6 @@
 package com.aleksadacic.springdataquerying.query;
 
+import com.aleksadacic.springdataquerying.enums.SearchOperator;
 import com.aleksadacic.springdataquerying.utils.GenericConverter;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -28,11 +29,11 @@ public class Query<T> {
 
     // Adds a simple where condition with default equality operator
     public Query<T> where(String attribute, Object value) {
-        return where(attribute, FilterOperator.EQ, value);
+        return where(attribute, SearchOperator.EQ, value);
     }
 
     // Adds a condition with a specified operator
-    public Query<T> where(String attribute, FilterOperator operator, Object value) {
+    public Query<T> where(String attribute, SearchOperator operator, Object value) {
         Specification<T> newSpec = new SpecificationWrapper<>(new Filter(attribute, operator, value));
         this.specification = this.specification == null ? newSpec : this.specification.and(newSpec);
         return this;
@@ -40,11 +41,11 @@ public class Query<T> {
 
     // Adds an AND condition
     public Query<T> and(String attribute, Object value) {
-        return and(attribute, FilterOperator.EQ, value);
+        return and(attribute, SearchOperator.EQ, value);
     }
 
     // Adds an AND condition with a specified operator
-    public Query<T> and(String attribute, FilterOperator operator, Object value) {
+    public Query<T> and(String attribute, SearchOperator operator, Object value) {
         Specification<T> newSpec = new SpecificationWrapper<>(new Filter(attribute, operator, value));
         this.specification = this.specification.and(newSpec);
         return this;
@@ -58,11 +59,11 @@ public class Query<T> {
 
     // Adds an OR condition
     public Query<T> or(String attribute, Object value) {
-        return or(attribute, FilterOperator.EQ, value);
+        return or(attribute, SearchOperator.EQ, value);
     }
 
     // Adds an OR condition with a specified operator
-    public Query<T> or(String attribute, FilterOperator operator, Object value) {
+    public Query<T> or(String attribute, SearchOperator operator, Object value) {
         Specification<T> newSpec = new SpecificationWrapper<>(new Filter(attribute, operator, value));
         this.specification = this.specification.or(newSpec);
         return this;
@@ -138,7 +139,7 @@ public class Query<T> {
     }
 
     // Method to execute the query with EntityManager
-    public <R> List<R> executeQuery(EntityManager entityManager, Class<T> entityType, String[] selectedFields, Class<R> returnType) {
+    public <R> List<R> executeQuery(EntityManager entityManager, Class<T> entityType, String[] selectedFields, Class<R> dtoClass) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> criteriaQuery = criteriaBuilder.createQuery(Object[].class);
         Root<T> root = criteriaQuery.from(entityType);
@@ -154,8 +155,10 @@ public class Query<T> {
         }
 
         // Create a SpecificationWrapper with the selected fields and apply them
-        SpecificationEngine.applySelection(root, criteriaQuery, List.of(selectedFields));
+        SpecificationEngine.applySelection(root, criteriaQuery, criteriaBuilder, List.of(selectedFields), dtoClass);
+
+
         TypedQuery<Object[]> query = entityManager.createQuery(criteriaQuery);
-        return GenericConverter.convertToList(query.getResultList(), returnType);
+        return GenericConverter.convertToList(query.getResultList(), dtoClass);
     }
 }

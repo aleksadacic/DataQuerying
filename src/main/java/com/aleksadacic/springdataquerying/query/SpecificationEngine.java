@@ -24,6 +24,7 @@ class SpecificationEngine {
         return criteriaBuilder.notEqual(fieldPath, filter.getValue());
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static Predicate gte(Filter filter, CriteriaBuilder criteriaBuilder, Expression<? extends Comparable> fieldPath) {
         return criteriaBuilder.greaterThanOrEqualTo(
                 fieldPath,
@@ -42,6 +43,7 @@ class SpecificationEngine {
         return inClause;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static Predicate between(Filter filter, CriteriaBuilder criteriaBuilder, Expression<? extends Comparable> fieldPath) {
         if (!(filter.getValue() instanceof List<?> valueList) || valueList.size() != 2) {
             throw new IllegalArgumentException("BETWEEN operator requires a list of two comparable values");
@@ -69,6 +71,7 @@ class SpecificationEngine {
         return criteriaBuilder.like(fieldPath.as(String.class), "%" + value + "%");
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static Predicate lt(Filter filter, CriteriaBuilder criteriaBuilder, Expression<? extends Comparable> fieldPath) {
         return criteriaBuilder.lessThan(
                 fieldPath,
@@ -76,6 +79,7 @@ class SpecificationEngine {
         );
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static Predicate gt(Filter filter, CriteriaBuilder criteriaBuilder, Expression<? extends Comparable> fieldPath) {
         return criteriaBuilder.greaterThan(
                 fieldPath,
@@ -83,6 +87,7 @@ class SpecificationEngine {
         );
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static Predicate lte(Filter filter, CriteriaBuilder criteriaBuilder, Expression<? extends Comparable> fieldPath) {
         return criteriaBuilder.lessThanOrEqualTo(
                 fieldPath,
@@ -91,10 +96,15 @@ class SpecificationEngine {
     }
 
     // Utility method to apply the selected fields to the CriteriaQuery
-    public static <T> void applySelection(Root<T> root, CriteriaQuery<?> query, List<String> selectedFields) {
-        if (selectedFields != null && !selectedFields.isEmpty()) {
-            query.multiselect(selectedFields.stream()
-                    .map(root::get).toArray(Selection[]::new));
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static <T> void applySelection(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder, List<String> selectedFields, Class<?> dtoClass) {
+        if (selectedFields != null && !selectedFields.isEmpty() && dtoClass != null) {
+            List<? extends Selection<?>> selections = selectedFields.stream()
+                    .map(field -> (Selection<?>) root.get(field)) // Cast each field path to Selection<?>
+                    .toList();
+
+            CompoundSelection<?> compoundSelection = criteriaBuilder.construct(dtoClass, selections.toArray(Selection[]::new));
+            query.select((Selection) compoundSelection);
         }
     }
 }
