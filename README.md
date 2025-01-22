@@ -214,12 +214,12 @@ Execute the query with your repository, taking advantage of the PageRequest or S
 ```
   com.aleksadacic.springdataquerying
   ├── api
+    ├── exceptions
   │ ├── Query.java // Public: dynamic query builder
   │ ├── SearchRequest.java // Public: JSON-friendly request object
   │ └── SearchOperator.java // Public: enumeration of operators (EQ, NOT_EQ, etc.)
   └── internal
     ├── enums
-    ├── exceptions
     ├── query
     ├── search
     └── utils
