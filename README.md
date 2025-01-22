@@ -146,7 +146,7 @@ When you need a dynamic query in your service or repository layer:
 
 Create a `SearchRequest<User>` on the client side (or in your code) that includes filters and pagination:
 
-```ajson
+```json
 {
   "filters": [
     {
