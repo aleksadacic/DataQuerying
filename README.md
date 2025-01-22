@@ -270,4 +270,4 @@ Issues and bug reports are welcome—please file them via the GitHub Issues sect
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE). Feel free to modify and distribute under these terms.
+This project is licensed under the [MIT License](LICENSE.txt). Feel free to modify and distribute under these terms.
