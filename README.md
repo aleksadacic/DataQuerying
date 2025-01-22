@@ -18,6 +18,7 @@ and `SearchOperator`.
     - [Building Queries Directly](#building-queries-directly)
     - [Using SearchRequest in APIs](#using-searchrequest-in-apis)
 - [Advanced Usage](#advanced-usage)
+- [Exceptions](#exceptions)
 - [Package Structure](#package-structure)
 - [Contributing](#contributing)
 - [License](#license)
@@ -46,6 +47,7 @@ dependencies {
 <summary>Maven</summary>
 
 ```xml
+
 <dependency>
     <groupId>com.aleksadacic.springdataquerying</groupId>
     <artifactId>spring-data-querying</artifactId>
@@ -208,6 +210,35 @@ Execute the query with your repository, taking advantage of the PageRequest or S
 > [!NOTE]
 > Most of these classes & operations are under internal packages, so you should only rely on them if you know the
 > internals. The library’s main public classes are `Query`, `SearchRequest`, and `SearchOperator`.
+
+## Exceptions
+
+When using the dynamic query features in this library, you may encounter the following exceptions. They are typically
+thrown if your filter definitions or query parameters are invalid. Catch them where appropriate, or surface them as HTTP
+errors in your REST APIs.
+
+- `AttributeNotFoundException` (`SpecificationBuilderException`)  
+  Thrown when the specified attribute does not exist on the entity when trying to create `Specification` object. For instance, if your query references a field that
+  isn’t a valid column/property, this exception indicates the attribute cannot be resolved.
+
+
+- `JoinNotFoundException` (`SpecificationBuilderException`)  
+  Thrown when attempting to perform a `join` on a relationship that doesn't exist or isn’t properly mapped. This might
+  happen if you reference a nested path (e.g., `user.address.city`) and one of the segments isn’t a valid association.
+
+
+- `MappingException` (`RuntimeException`)  
+  Signals a more general mapping error. For example, if the library is unable to convert an input value into the correct
+  type needed for the query or if there’s a mismatch between the filter type and the entity’s field type.
+
+
+- `SpecificationBuilderException` (`RuntimeException`)  
+  This is a wrapper for the `RuntimeException`. Thrown if there is an error in building the `Specification`—for example,
+  conflicting operators, logical errors in
+  filter groupings, or issues that prevent the library from creating a valid JPA criteria.
+
+In most cases, these exceptions indicate an issue with how your filters or joins are configured. Proper validation of
+incoming request data (e.g., attribute names, operator types) can help avoid them.
 
 ## Package Structure
 

@@ -1,5 +1,6 @@
 package com.aleksadacic.springdataquerying.internal.specification;
 
+import com.aleksadacic.springdataquerying.api.exceptions.SpecificationBuilderException;
 import jakarta.persistence.criteria.*;
 
 import java.util.Collection;
@@ -34,7 +35,7 @@ public class SpecificationEngine {
 
     public static CriteriaBuilder.In<Object> in(Filter filter, CriteriaBuilder criteriaBuilder, Path<?> fieldPath) {
         if (!(filter.getValue() instanceof Collection<?> values)) {
-            throw new IllegalArgumentException("IN operator requires a collection of values");
+            throw new SpecificationBuilderException("IN operator requires a collection of values");
         }
         CriteriaBuilder.In<Object> inClause = criteriaBuilder.in(fieldPath);
         for (Object value : values) {
@@ -46,7 +47,7 @@ public class SpecificationEngine {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static Predicate between(Filter filter, CriteriaBuilder criteriaBuilder, Expression<? extends Comparable> fieldPath) {
         if (!(filter.getValue() instanceof List<?> valueList) || valueList.size() != 2) {
-            throw new IllegalArgumentException("BETWEEN operator requires a list of two comparable values");
+            throw new SpecificationBuilderException("BETWEEN operator requires a list of two comparable values");
         }
         Comparable lowerBound = (Comparable) valueList.get(0);
         Comparable upperBound = (Comparable) valueList.get(1);
@@ -59,14 +60,14 @@ public class SpecificationEngine {
 
     public static Predicate notLike(Filter filter, CriteriaBuilder criteriaBuilder, Path<?> fieldPath) {
         if (!(filter.getValue() instanceof String value)) {
-            throw new IllegalArgumentException("NOT_LIKE operator requires a String value");
+            throw new SpecificationBuilderException("NOT_LIKE operator requires a String value");
         }
         return criteriaBuilder.notLike(fieldPath.as(String.class), "%" + value + "%");
     }
 
     public static Predicate like(Filter filter, CriteriaBuilder criteriaBuilder, Path<?> fieldPath) {
         if (!(filter.getValue() instanceof String value)) {
-            throw new IllegalArgumentException("LIKE operator requires a String value");
+            throw new SpecificationBuilderException("LIKE operator requires a String value");
         }
         return criteriaBuilder.like(fieldPath.as(String.class), "%" + value + "%");
     }
