@@ -102,7 +102,7 @@ Key methods:
 
 Example:
 
-```ajava
+```java
   Query<User> userQuery = Query.get()
   .where("email", SearchOperator.EQ, "test@example.com")
   .or("active", SearchOperator.EQ, true);
@@ -132,7 +132,7 @@ method `getSpecification` to pass to *repository* methods.
 
 When you need a dynamic query in your service or repository layer:
 
-```ajava
+```java
   Query<User> userQuery = Query.get()
   .where("country", SearchOperator.EQ, "USA")
   .and("age", SearchOperator.GTE, 18)
@@ -177,7 +177,7 @@ Create a `SearchRequest<User>` on the client side (or in your code) that include
 
 Receive it in your Spring REST Controller:
 
-```ajava
+```java
     @RestController
     @RequestMapping("/users")
     public class UserController {
