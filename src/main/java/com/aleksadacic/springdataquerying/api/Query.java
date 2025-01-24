@@ -119,7 +119,7 @@ public class Query<T> {
             List<Predicate> predicates = new ArrayList<>();
 
             if (this.distinct) {
-                query.distinct(true);
+                query = query.distinct(true);
             }
 
             // Collect predicates from the specification
@@ -131,7 +131,7 @@ public class Query<T> {
             }
             // Combine predicates if they are not empty
             if (!predicates.isEmpty()) {
-                query.where(criteriaBuilder.and(predicates.toArray(new Predicate[0])));
+                query = query.where(criteriaBuilder.and(predicates.toArray(new Predicate[0])));
             }
 
             return query.getRestriction();

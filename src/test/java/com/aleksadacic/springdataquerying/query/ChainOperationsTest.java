@@ -2,7 +2,10 @@ package com.aleksadacic.springdataquerying.query;
 
 import com.aleksadacic.springdataquerying.api.Query;
 import com.aleksadacic.springdataquerying.api.SearchOperator;
-import jakarta.persistence.criteria.*;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -12,16 +15,11 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class ChainOperationsTest {
+class ChainOperationsTest extends QueryTestBase {
 
     @Test
     @SuppressWarnings("unchecked")
     void testWithJoin() {
-        // Arrange
-        Root<Object> root = mock(Root.class);
-        CriteriaQuery<Object> criteriaQuery = mock(CriteriaQuery.class);
-        CriteriaBuilder criteriaBuilder = mock(CriteriaBuilder.class);
-
         // Mock
         Join<Object, Object> ordersJoin = mock(Join.class);
         Join<Object, Object> paymentJoin = mock(Join.class);
@@ -48,11 +46,8 @@ class ChainOperationsTest {
         // Mock behavior for CriteriaBuilder
         when(agePath.as(Integer.class)).thenReturn(mock(Path.class));
         when(criteriaBuilder.greaterThan(any(Path.class), eq(25))).thenReturn(agePredicate);
-        when(criteriaBuilder.and(agePredicate)).thenReturn(agePredicate);
 
-        // Additional mocks for CriteriaQuery
-        when(criteriaQuery.where(agePredicate)).thenReturn(criteriaQuery);
-        when(criteriaQuery.getRestriction()).thenReturn(agePredicate);
+        buildSpecificationMock(null, agePredicate);
 
         Query<Object> query = Query.get();
         query.join("orders.payment", JoinType.INNER).and("age", SearchOperator.GT, 25);
@@ -73,51 +68,43 @@ class ChainOperationsTest {
     @Test
     @SuppressWarnings("unchecked")
     void testWithAndConditions() {
-        // Arrange
-        Root<Object> root = mock(Root.class);
-        CriteriaQuery<Object> criteriaQuery = mock(CriteriaQuery.class);
-        CriteriaBuilder criteriaBuilder = mock(CriteriaBuilder.class);
-
-        // Mock Path objects for name and age
-        Path<Object> namePath = mock(Path.class);
-        Path<Object> agePath = mock(Path.class);
-
-        // Mock interactions for root
-        when(root.get("name")).thenReturn(namePath);
+        // Mock the behavior of root to path
+        Path<Integer> agePath = mock(Path.class);
+        Path<String> namePath = mock(Path.class);
         when(root.get("age")).thenReturn(agePath);
+        when(root.get("name")).thenReturn(namePath);
 
-        // Mock interactions for CriteriaBuilder
-        Predicate namePredicate = mock(Predicate.class);
+        // Mock predicates for age and name
         Predicate agePredicate = mock(Predicate.class);
+        Predicate namePredicate = mock(Predicate.class);
         Predicate combinedPredicate = mock(Predicate.class);
 
-        // Mock behavior for CriteriaBuilder
+        // Mock CriteriaBuilder behavior
+        when(agePath.as(Integer.class)).thenReturn(agePath);
+        when(namePath.as(String.class)).thenReturn(namePath);
+        when(criteriaBuilder.greaterThan(agePath, 25)).thenReturn(agePredicate);
         when(criteriaBuilder.equal(namePath, "John")).thenReturn(namePredicate);
-        when(agePath.as(Integer.class)).thenReturn(mock(Path.class));
-        when(criteriaBuilder.greaterThan(any(Path.class), eq(25))).thenReturn(agePredicate);
-        when(criteriaBuilder.and(namePredicate, agePredicate)).thenReturn(combinedPredicate);
+        when(criteriaBuilder.and(agePredicate, namePredicate)).thenReturn(combinedPredicate);
 
-        // Additional mocks for CriteriaQuery
-        when(criteriaQuery.where(combinedPredicate)).thenReturn(criteriaQuery);
-        when(criteriaQuery.getRestriction()).thenReturn(combinedPredicate);
-
-        Query<Object> query = Query.get()
-                .and("name", "John")
-                .and("age", SearchOperator.GT, 25);
+        buildSpecificationMock(null, combinedPredicate);
 
         // Act
-        Specification<Object> specification = query.buildSpecification();
-        Predicate result = specification.toPredicate(root, criteriaQuery, criteriaBuilder);
+        Query<Object> query = Query
+                .where("age", SearchOperator.GT, 25)
+                .and("name", SearchOperator.EQ, "John");
+        Specification<Object> actualSpecification = query.buildSpecification();
+        Predicate actualPredicate = actualSpecification.toPredicate(root, criteriaQuery, criteriaBuilder);
 
         // Assert
-        assertNotNull(result, "Predicate should not be null");
-        assertEquals(combinedPredicate, result, "The combined predicate should match the expected predicate");
+        assertNotNull(actualPredicate, "The predicate should not be null");
+        assertEquals(combinedPredicate, actualPredicate, "The combined predicate should match the expected predicate");
 
         // Verify interactions
-        verify(root).get("name");
         verify(root).get("age");
+        verify(root).get("name");
+        verify(criteriaBuilder).greaterThan(agePath, 25);
         verify(criteriaBuilder).equal(namePath, "John");
-        verify(criteriaBuilder).greaterThan(any(Path.class), eq(25));
-        verify(criteriaBuilder).and(namePredicate, agePredicate);
+        verify(criteriaBuilder).and(agePredicate, namePredicate);
     }
+
 }

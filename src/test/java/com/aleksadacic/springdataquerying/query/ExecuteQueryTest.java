@@ -38,6 +38,7 @@ class ExecuteQueryTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void testExecuteQuery() {
         // Arrange
         EntityManager entityManager = mock(EntityManager.class);
@@ -84,5 +85,4 @@ class ExecuteQueryTest {
         verify(criteriaQuery).from(Dto.class);
         verify(typedQuery).getResultList();
     }
-
 }

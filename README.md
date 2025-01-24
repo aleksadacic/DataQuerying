@@ -80,7 +80,7 @@ public enum SearchOperator {
     GTE,
     LTE,
     GT,
-    LT
+    LT,
     IN,
     BETWEEN,
     LIKE,
