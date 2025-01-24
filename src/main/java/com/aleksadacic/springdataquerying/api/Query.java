@@ -25,21 +25,22 @@ public class Query<T> {
         return new Query<>();
     }
 
-    public Query<T> where(Query<T> query) {
-        this.specification = Specification.where(query.buildSpecification());
-        return this;
+    public static <T> Query<T> where(Query<T> query) {
+        Query<T> instance = new Query<>();
+        instance.specification = Specification.where(query.buildSpecification());
+        return instance;
     }
 
     // Adds a simple where condition with default equality operator
-    public Query<T> where(String attribute, Object value) {
-        return where(attribute, SearchOperator.EQ, value);
+    public static <T> Query<T> where(String attribute, Object value) {
+        return Query.where(attribute, SearchOperator.EQ, value);
     }
 
     // Adds a condition with a specified operator
-    public Query<T> where(String attribute, SearchOperator operator, Object value) {
-        Specification<T> newSpec = new SpecificationWrapper<>(new Filter(attribute, operator, value));
-        this.specification = this.specification == null ? newSpec : this.specification.and(newSpec);
-        return this;
+    public static <T> Query<T> where(String attribute, SearchOperator operator, Object value) {
+        Query<T> instance = new Query<>();
+        instance.specification = new SpecificationWrapper<>(new Filter(attribute, operator, value));
+        return instance;
     }
 
     // Adds an AND condition
@@ -144,7 +145,7 @@ public class Query<T> {
     }
 
     // Method to execute the query with EntityManager
-    public <R> List<R> executeQuery(EntityManager entityManager, Class<T> entityType, String[] selectedFields, Class<R> dtoClass) {
+    public <R> List<R> executeQuery(EntityManager entityManager, Class<T> entityType, Class<R> dtoClass) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> criteriaQuery = criteriaBuilder.createQuery(Object[].class);
         Root<T> root = criteriaQuery.from(entityType);
@@ -160,7 +161,7 @@ public class Query<T> {
         }
 
         // Create a SpecificationWrapper with the selected fields and apply them
-        SpecificationEngine.applySelection(root, criteriaQuery, criteriaBuilder, List.of(selectedFields), dtoClass);
+        SpecificationEngine.applySelection(root, criteriaQuery, criteriaBuilder, dtoClass);
 
 
         TypedQuery<Object[]> query = entityManager.createQuery(criteriaQuery);

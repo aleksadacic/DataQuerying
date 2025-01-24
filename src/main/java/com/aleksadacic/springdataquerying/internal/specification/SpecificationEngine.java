@@ -3,6 +3,8 @@ package com.aleksadacic.springdataquerying.internal.specification;
 import com.aleksadacic.springdataquerying.api.exceptions.SpecificationBuilderException;
 import jakarta.persistence.criteria.*;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -98,8 +100,9 @@ public class SpecificationEngine {
 
     // Utility method to apply the selected fields to the CriteriaQuery
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public static <T> void applySelection(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder, List<String> selectedFields, Class<?> dtoClass) {
-        if (selectedFields != null && !selectedFields.isEmpty() && dtoClass != null) {
+    public static <T> void applySelection(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder, Class<?> dtoClass) {
+        List<String> selectedFields = Arrays.stream(dtoClass.getDeclaredFields()).map(Field::getName).toList();
+        if (!selectedFields.isEmpty()) {
             List<? extends Selection<?>> selections = selectedFields.stream()
                     .map(field -> (Selection<?>) root.get(field)) // Cast each field path to Selection<?>
                     .toList();
