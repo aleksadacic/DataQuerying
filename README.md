@@ -186,10 +186,8 @@ Receive it in your Spring REST Controller:
         private UserRepository userRepository;
 
         @PostMapping("/search")
-        public List<User> searchUsers(@RequestBody SearchRequest<User> request) {
-            Query<User> query = SearchRequestQueryTransformer.toQuery(request);
-            Specification<User> spec = query.buildSpecification();
-            return userRepository.findAll(spec, request.getPageRequest()).getContent();
+        public List<User> search(@RequestBody SearchRequest<User> request) {
+            return userRepository.findAll(request.getSpecification(), request.getPageRequest());
         }
     }
 ```
