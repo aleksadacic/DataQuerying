@@ -38,7 +38,6 @@ class ConditionalOperatorDeserializerTest {
         closeable.close();
     }
 
-
     @Test
     void testDeserializeValidValue_AND() throws IOException {
         // Suppose ConditionalOperator has an "AND" whose .operator = "AND"
