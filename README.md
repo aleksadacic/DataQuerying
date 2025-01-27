@@ -104,11 +104,11 @@ Example:
 
 ```java
   Query<User> userQuery = Query.get()
-  .where("email", SearchOperator.EQ, "test@example.com")
-  .or("active", SearchOperator.EQ, true);
-  
-  Specification<User> spec = userQuery.buildSpecification();
-  List<User> results = userRepository.findAll(spec);
+        .where("email", SearchOperator.EQ, "test@example.com")
+        .or("active", SearchOperator.EQ, true);
+
+Specification<User> spec = userQuery.buildSpecification();
+List<User> results = userRepository.findAll(spec);
 ```
 
 ### SearchRequest
@@ -134,12 +134,12 @@ When you need a dynamic query in your service or repository layer:
 
 ```java
   Query<User> userQuery = Query.get()
-  .where("country", SearchOperator.EQ, "USA")
-  .and("age", SearchOperator.GTE, 18)
-  .distinct();
-  
-  Specification<User> spec = userQuery.buildSpecification();
-  List<User> adultsInUSA = userRepository.findAll(spec);
+        .where("country", SearchOperator.EQ, "USA")
+        .and("age", SearchOperator.GTE, 18)
+        .distinct();
+
+Specification<User> spec = userQuery.buildSpecification();
+List<User> adultsInUSA = userRepository.findAll(spec);
 ```
 
 ### Using SearchRequest in APIs
@@ -178,18 +178,19 @@ Create a `SearchRequest` on the client side (or in your code) that includes filt
 Receive it in your Spring REST Controller:
 
 ```java
-    @RestController
-    @RequestMapping("/users")
-    public class UserController {
 
-        @Autowired
-        private UserRepository userRepository;
+@RestController
+@RequestMapping("/users")
+public class UserController {
 
-        @PostMapping("/search")
-        public List<User> search(@RequestBody SearchRequest request) {
-            return userRepository.findAll(request.getSpecification(), request.getPageRequest());
-        }
+    @Autowired
+    private UserRepository userRepository;
+
+    @PostMapping("/search")
+    public List<User> search(@RequestBody SearchRequest request) {
+        return userRepository.findAll(request.getSpecification(), request.getPageRequest());
     }
+}
 ```
 
 Execute the query with your repository, taking advantage of the PageRequest or Sort from the SearchRequest.
@@ -202,11 +203,13 @@ Execute the query with your repository, taking advantage of the PageRequest or S
   a
   combined `Specification` or `CriteriaQuery`.
 
-- Joins: The `Query` object supports `.join("attribute.subAttribute", JoinType.LEFT)`.
+- Joins: The `Query` object supports joins, e.g. `.join("attribute.subAttribute", JoinType.LEFT)`.
 - DTO Projection: Using `executeQuery(...)` allows you to project selected fields into a custom DTO class.
 
+[//]: # (TODO primeri iz koda i da se definise sta je advanced)
+
 > [!NOTE]
-> Most of these classes & operations are under internal packages, so you should only rely on them if you know the
+> Classes under `internal` package should only be used if you know and understand the
 > internals. The library’s main public classes are `Query`, `SearchRequest`, and `SearchOperator`.
 
 ## Exceptions
@@ -216,7 +219,8 @@ thrown if your filter definitions or query parameters are invalid. Catch them wh
 errors in your REST APIs.
 
 - `AttributeNotFoundException` (`SpecificationBuilderException`)  
-  Thrown when the specified attribute does not exist on the entity when trying to create `Specification` object. For instance, if your query references a field that
+  Thrown when the specified attribute does not exist on the entity when trying to create `Specification` object. For
+  instance, if your query references a field that
   isn’t a valid column/property, this exception indicates the attribute cannot be resolved.
 
 
