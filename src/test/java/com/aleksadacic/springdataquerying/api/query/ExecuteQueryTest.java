@@ -2,8 +2,6 @@ package com.aleksadacic.springdataquerying.api.query;
 
 import com.aleksadacic.springdataquerying.api.Query;
 import com.aleksadacic.springdataquerying.api.SearchOperator;
-import utils.Dto;
-import utils.DtoMinimal;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
@@ -14,6 +12,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import utils.Dto;
+import utils.DtoMinimal;
 
 import java.util.Collections;
 import java.util.List;
@@ -31,11 +31,11 @@ class ExecuteQueryTest {
     @Mock
     private CriteriaBuilder criteriaBuilder;
     @Mock
-    private CriteriaQuery<Object[]> criteriaQuery;
+    private CriteriaQuery<DtoMinimal> criteriaQuery;
     @Mock
     private Root<Dto> root;
     @Mock
-    private TypedQuery<Object[]> typedQuery;
+    private TypedQuery<DtoMinimal> typedQuery;
 
     // Paths for age and name
     @Mock
@@ -53,7 +53,7 @@ class ExecuteQueryTest {
         closeable = MockitoAnnotations.openMocks(this);
 
         when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
-        when(criteriaBuilder.createQuery(Object[].class)).thenReturn(criteriaQuery);
+        when(criteriaBuilder.createQuery(DtoMinimal.class)).thenReturn(criteriaQuery);
         when(criteriaQuery.from(Dto.class)).thenReturn(root);
 
         // Return the same criteriaQuery in builder chain style
@@ -61,8 +61,7 @@ class ExecuteQueryTest {
 
         // Use typedQuery for final fetch
         when(entityManager.createQuery(criteriaQuery)).thenReturn(typedQuery);
-        when(typedQuery.getResultList()).thenReturn(Collections.singletonList(new Object[]{"John"} // e.g. 1 column, name
-        ));
+        when(typedQuery.getResultList()).thenReturn(Collections.singletonList(new DtoMinimal("John")));
 
         // Stub the path for "age"
         when(root.get("age")).thenReturn(agePath);

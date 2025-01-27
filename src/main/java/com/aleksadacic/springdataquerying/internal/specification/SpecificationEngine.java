@@ -1,10 +1,9 @@
 package com.aleksadacic.springdataquerying.internal.specification;
 
 import com.aleksadacic.springdataquerying.api.exceptions.SpecificationBuilderException;
+import com.aleksadacic.springdataquerying.internal.utils.ReflectionUtils;
 import jakarta.persistence.criteria.*;
 
-import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -99,16 +98,15 @@ public class SpecificationEngine {
     }
 
     // Utility method to apply the selected fields to the CriteriaQuery
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public static <T> void applySelection(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder, Class<?> dtoClass) {
-        List<String> selectedFields = Arrays.stream(dtoClass.getDeclaredFields()).map(Field::getName).toList();
+    public static <T, R> void applySelection(Root<T> root, CriteriaQuery<R> query, CriteriaBuilder criteriaBuilder, Class<R> dtoClass) {
+        List<String> selectedFields = ReflectionUtils.getAttributeNamesFromGetters(dtoClass);
         if (!selectedFields.isEmpty()) {
             List<? extends Selection<?>> selections = selectedFields.stream()
                     .map(field -> (Selection<?>) root.get(field)) // Cast each field path to Selection<?>
                     .toList();
 
-            CompoundSelection<?> compoundSelection = criteriaBuilder.construct(dtoClass, selections.toArray(Selection[]::new));
-            query.select((Selection) compoundSelection);
+            CompoundSelection<R> compoundSelection = criteriaBuilder.construct(dtoClass, selections.toArray(Selection[]::new));
+            query.select(compoundSelection);
         }
     }
 }

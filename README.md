@@ -144,7 +144,7 @@ When you need a dynamic query in your service or repository layer:
 
 ### Using SearchRequest in APIs
 
-Create a `SearchRequest<User>` on the client side (or in your code) that includes filters and pagination:
+Create a `SearchRequest` on the client side (or in your code) that includes filters and pagination:
 
 ```json
 {
@@ -186,7 +186,7 @@ Receive it in your Spring REST Controller:
         private UserRepository userRepository;
 
         @PostMapping("/search")
-        public List<User> search(@RequestBody SearchRequest<User> request) {
+        public List<User> search(@RequestBody SearchRequest request) {
             return userRepository.findAll(request.getSpecification(), request.getPageRequest());
         }
     }

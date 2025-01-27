@@ -42,7 +42,7 @@ class SearchRequestQueryTransformerTest {
     @Test
     void testToQuery_noFilters() {
         // Given
-        SearchRequest<Object> request = new SearchRequest<>();
+        SearchRequest request = new SearchRequest();
         // No filters set (request.getFilters() is null or empty)
 
         // When
@@ -67,7 +67,7 @@ class SearchRequestQueryTransformerTest {
     @Test
     void testToQuery_singleFilter_andOperator() {
         // Given
-        SearchRequest<Object> request = new SearchRequest<>();
+        SearchRequest request = new SearchRequest();
         request.setConditionalOperator(ConditionalOperator.AND);
 
         FilterData filterData = new FilterData();
@@ -96,7 +96,7 @@ class SearchRequestQueryTransformerTest {
     @Test
     void testToQuery_singleFilter_orOperator() {
         // Given
-        SearchRequest<Object> request = new SearchRequest<>();
+        SearchRequest request = new SearchRequest();
         request.setConditionalOperator(ConditionalOperator.OR);
 
         FilterData filterData = new FilterData();
@@ -122,7 +122,7 @@ class SearchRequestQueryTransformerTest {
     @Test
     void testToQuery_attributeWithDot_triggersJoinAndDistinct() {
         // Given
-        SearchRequest<Object> request = new SearchRequest<>();
+        SearchRequest request = new SearchRequest();
         request.setConditionalOperator(ConditionalOperator.AND);
 
         FilterData filterData = new FilterData();
@@ -152,7 +152,7 @@ class SearchRequestQueryTransformerTest {
     @Test
     void testToQuery_multipleFilters_OR() {
         // 2 top-level filters with OR
-        SearchRequest<Object> request = new SearchRequest<>();
+        SearchRequest request = new SearchRequest();
         request.setConditionalOperator(ConditionalOperator.OR);
 
         FilterData f1 = new FilterData();
@@ -185,7 +185,7 @@ class SearchRequestQueryTransformerTest {
 
     @Test
     void testToQuery_nestedFilters() {
-        SearchRequest<Object> request = new SearchRequest<>();
+        SearchRequest request = new SearchRequest();
         request.setConditionalOperator(ConditionalOperator.OR);
 
         FilterData subF1 = new FilterData();

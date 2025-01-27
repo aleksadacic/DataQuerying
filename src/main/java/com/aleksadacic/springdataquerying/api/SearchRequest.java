@@ -18,7 +18,7 @@ import java.util.List;
 
 @Setter
 @Getter
-public class SearchRequest<T> {
+public class SearchRequest {
     private List<FilterData> filters; // List of filters, supports nesting
     private ConditionalOperator conditionalOperator; // AND, OR for a filter group
     private PageInfo page; // Pagination information
@@ -26,13 +26,13 @@ public class SearchRequest<T> {
 
     @SuppressWarnings("unused")
     @JsonIgnore
-    public Specification<T> getSpecification() {
-        return SearchRequestQueryTransformer.toQuery(this).buildSpecification();
+    public <T> Specification<T> getSpecification() {
+        return SearchRequestQueryTransformer.<T>toQuery(this).buildSpecification();
     }
 
     @SuppressWarnings("unused")
     @JsonIgnore
-    public Query<T> getQuery() {
+    public <T> Query<T> getQuery() {
         return SearchRequestQueryTransformer.toQuery(this);
     }
 

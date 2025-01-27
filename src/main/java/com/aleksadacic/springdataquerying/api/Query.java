@@ -3,7 +3,6 @@ package com.aleksadacic.springdataquerying.api;
 import com.aleksadacic.springdataquerying.internal.specification.Filter;
 import com.aleksadacic.springdataquerying.internal.specification.SpecificationEngine;
 import com.aleksadacic.springdataquerying.internal.specification.SpecificationWrapper;
-import com.aleksadacic.springdataquerying.internal.utils.GenericConverter;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
@@ -147,7 +146,7 @@ public class Query<T> {
     // Method to execute the query with EntityManager
     public <R> List<R> executeQuery(EntityManager entityManager, Class<T> entityType, Class<R> dtoClass) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Object[]> criteriaQuery = criteriaBuilder.createQuery(Object[].class);
+        CriteriaQuery<R> criteriaQuery = criteriaBuilder.createQuery(dtoClass);
         Root<T> root = criteriaQuery.from(entityType);
 
         if (this.distinct) {
@@ -163,8 +162,7 @@ public class Query<T> {
         // Create a SpecificationWrapper with the selected fields and apply them
         SpecificationEngine.applySelection(root, criteriaQuery, criteriaBuilder, dtoClass);
 
-
-        TypedQuery<Object[]> query = entityManager.createQuery(criteriaQuery);
-        return GenericConverter.convertToList(query.getResultList(), dtoClass);
+        TypedQuery<R> query = entityManager.createQuery(criteriaQuery);
+        return query.getResultList();
     }
 }

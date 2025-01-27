@@ -13,7 +13,7 @@ public class SearchRequestQueryTransformer {
     private SearchRequestQueryTransformer() {
     }
 
-    public static <T> Query<T> toQuery(SearchRequest<T> request) {
+    public static <T> Query<T> toQuery(SearchRequest request) {
         // Start with an empty Query
         Query<T> query = Query.get();
 
@@ -24,7 +24,7 @@ public class SearchRequestQueryTransformer {
 
         return query;
     }
-    
+
     // Recursively processes the list of filters and appends them to the Query.
     private static <T> void processFilters(Query<T> query,
                                            List<FilterData> filters,

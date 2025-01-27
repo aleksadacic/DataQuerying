@@ -27,7 +27,7 @@ class SearchRequestTest {
     @Test
     void testGetQuery_withNoFilters() {
         // Given
-        SearchRequest<Dto> request = new SearchRequest<>();
+        SearchRequest request = new SearchRequest();
         // No filters, no operator set
 
         // When
@@ -40,7 +40,7 @@ class SearchRequestTest {
     @Test
     void testGetQuery_withSomeFilters() {
         // Given
-        SearchRequest<Dto> request = new SearchRequest<>();
+        SearchRequest request = new SearchRequest();
         request.setConditionalOperator(ConditionalOperator.AND);
 
         FilterData filter1 = new FilterData();
@@ -65,7 +65,7 @@ class SearchRequestTest {
     @Test
     void testGetPageable_noPageSet() {
         // Given
-        SearchRequest<String> request = new SearchRequest<>();
+        SearchRequest request = new SearchRequest();
 
         // When
         Pageable pageable = request.getPageable();
@@ -77,7 +77,7 @@ class SearchRequestTest {
     @Test
     void testGetPageable_withValidPage() {
         // Given
-        SearchRequest<String> request = new SearchRequest<>();
+        SearchRequest request = new SearchRequest();
         PageInfo pageInfo = new PageInfo();
         pageInfo.setPageSize(20);
         request.setPage(pageInfo);
@@ -93,14 +93,14 @@ class SearchRequestTest {
 
     @Test
     void testGetPageRequest_noPageInfo() {
-        SearchRequest<String> request = new SearchRequest<>();
+        SearchRequest request = new SearchRequest();
         assertNull(request.getPageRequest(), "If page info is not set, getPageRequest() should return null");
     }
 
     @Test
     void testGetPageRequest_withPageSizeAndNumber_noOrder() {
         // Given
-        SearchRequest<String> request = new SearchRequest<>();
+        SearchRequest request = new SearchRequest();
         PageInfo pageInfo = new PageInfo();
         pageInfo.setPageNumber(2);
         pageInfo.setPageSize(50);
@@ -119,7 +119,7 @@ class SearchRequestTest {
     @Test
     void testGetPageRequest_withOrder() {
         // Given
-        SearchRequest<String> request = new SearchRequest<>();
+        SearchRequest request = new SearchRequest();
         PageInfo pageInfo = new PageInfo();
         pageInfo.setPageNumber(0);
         pageInfo.setPageSize(10);
@@ -150,7 +150,7 @@ class SearchRequestTest {
 
     @Test
     void testGetSort_noOrder() {
-        SearchRequest<String> request = new SearchRequest<>();
+        SearchRequest request = new SearchRequest();
 
         Sort sort = request.getSort();
         assertTrue(sort.isUnsorted(), "No orders => unsorted");
@@ -158,7 +158,7 @@ class SearchRequestTest {
 
     @Test
     void testGetSort_withOrder() {
-        SearchRequest<String> request = new SearchRequest<>();
+        SearchRequest request = new SearchRequest();
 
         OrderInfo o1 = new OrderInfo("city", SortOrder.ASC);
         OrderInfo o2 = new OrderInfo("age", SortOrder.DESC);
