@@ -1,0 +1,17 @@
+{
+  "filters": [
+    {
+      "attribute": "name",
+      "searchOperator": "EQ",
+      "value": "Alice"
+    },
+    {
+      "attribute": "name",
+      "searchOperator": "EQ",
+      "value": "Bob"
+    }
+  ],
+  "conditionalOperator": "OR",
+  "page": null,
+  "order": []
+}

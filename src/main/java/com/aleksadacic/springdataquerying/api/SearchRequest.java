@@ -39,29 +39,26 @@ public class SearchRequest {
     @SuppressWarnings("unused")
     @JsonIgnore
     public Pageable getPageable() {
-        if (page != null && page.getPageSize() != null) {
-            return Pageable.ofSize(page.getPageSize());
-        }
-        return Pageable.unpaged();
+        PageRequest pageRequest = getPageRequest();
+        if (pageRequest == null) return Pageable.unpaged();
+        return pageRequest;
     }
 
     @SuppressWarnings("unused")
     @JsonIgnore
     public PageRequest getPageRequest() {
         PageRequest pageRequest = null;
-        if (page != null && page.getPageNumber() != null && page.getPageSize() != null) {
-            pageRequest = PageRequest.of(page.getPageNumber(), page.getPageSize());
+        if (page != null && page.getPageSize() != null) {
+            pageRequest = PageRequest.ofSize(page.getPageSize());
+            if (page.getPageNumber() != null) {
+                pageRequest = PageRequest.of(page.getPageNumber(), page.getPageSize());
+            }
         }
 
         if (pageRequest == null)
             return null;
 
-        List<Sort.Order> orders = new ArrayList<>();
-        for (OrderInfo orderInfo : order) {
-            Sort.Direction direction = Sort.Direction.valueOf(orderInfo.getSortOrder().value);
-            orders.add(new Sort.Order(direction, orderInfo.getAttribute()));
-        }
-        return pageRequest.withSort(Sort.by(orders));
+        return pageRequest.withSort(getSort());
     }
 
     @SuppressWarnings("unused")

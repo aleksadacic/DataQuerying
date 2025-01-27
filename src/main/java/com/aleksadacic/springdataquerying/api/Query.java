@@ -3,13 +3,17 @@ package com.aleksadacic.springdataquerying.api;
 import com.aleksadacic.springdataquerying.internal.specification.Filter;
 import com.aleksadacic.springdataquerying.internal.specification.SpecificationEngine;
 import com.aleksadacic.springdataquerying.internal.specification.SpecificationWrapper;
+import com.aleksadacic.springdataquerying.internal.utils.QueryUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Tuple;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("unused")
 public class Query<T> {
@@ -146,7 +150,7 @@ public class Query<T> {
     // Method to execute the query with EntityManager
     public <R> List<R> executeQuery(EntityManager entityManager, Class<T> entityType, Class<R> dtoClass) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<R> criteriaQuery = criteriaBuilder.createQuery(dtoClass);
+        CriteriaQuery<Tuple> criteriaQuery = criteriaBuilder.createTupleQuery();
         Root<T> root = criteriaQuery.from(entityType);
 
         if (this.distinct) {
@@ -156,13 +160,22 @@ public class Query<T> {
         // Apply the specification to build predicates and select fields
         if (specification != null) {
             Predicate predicate = specification.toPredicate(root, criteriaQuery, criteriaBuilder);
-            criteriaQuery.where(predicate);
+            if (predicate != null) {
+                criteriaQuery.where(predicate);
+            }
         }
 
         // Create a SpecificationWrapper with the selected fields and apply them
         SpecificationEngine.applySelection(root, criteriaQuery, criteriaBuilder, dtoClass);
 
-        TypedQuery<R> query = entityManager.createQuery(criteriaQuery);
-        return query.getResultList();
+        // Execute the query
+        TypedQuery<Tuple> query = entityManager.createQuery(criteriaQuery);
+        List<Tuple> results = query.getResultList();
+
+        List<Map<String, Object>> mappedResults = QueryUtils.mapTuplesToFieldValues(results, dtoClass);
+
+        // Map the results to DTOs using reflection
+        ObjectMapper mapper = new ObjectMapper();
+        return QueryUtils.convertToDtoList(dtoClass, mappedResults, mapper);
     }
 }

@@ -3,6 +3,7 @@ package com.aleksadacic.springdataquerying.unit.api.query;
 import com.aleksadacic.springdataquerying.api.Query;
 import com.aleksadacic.springdataquerying.api.SearchOperator;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Tuple;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import org.junit.jupiter.api.AfterEach;
@@ -31,11 +32,13 @@ class ExecuteQueryTest {
     @Mock
     private CriteriaBuilder criteriaBuilder;
     @Mock
-    private CriteriaQuery<DtoMinimal> criteriaQuery;
+    private CriteriaQuery<Tuple> criteriaQuery;
     @Mock
     private Root<Dto> root;
     @Mock
-    private TypedQuery<DtoMinimal> typedQuery;
+    private TypedQuery<Tuple> typedQuery;
+    @Mock
+    private Tuple tuple;
 
     // Paths for age and name
     @Mock
@@ -53,7 +56,7 @@ class ExecuteQueryTest {
         closeable = MockitoAnnotations.openMocks(this);
 
         when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
-        when(criteriaBuilder.createQuery(DtoMinimal.class)).thenReturn(criteriaQuery);
+        when(criteriaBuilder.createTupleQuery()).thenReturn(criteriaQuery);
         when(criteriaQuery.from(Dto.class)).thenReturn(root);
 
         // Return the same criteriaQuery in builder chain style
@@ -61,7 +64,9 @@ class ExecuteQueryTest {
 
         // Use typedQuery for final fetch
         when(entityManager.createQuery(criteriaQuery)).thenReturn(typedQuery);
-        when(typedQuery.getResultList()).thenReturn(Collections.singletonList(new DtoMinimal("John")));
+        when(typedQuery.getResultList()).thenReturn(Collections.singletonList(tuple));
+        when(tuple.get("name")).thenReturn("John"); // Assuming DtoMinimal has a 'name' field
+        when(tuple.get("age")).thenReturn("26"); // Assuming DtoMinimal has a 'age' field
 
         // Stub the path for "age"
         when(root.get("age")).thenReturn(agePath);

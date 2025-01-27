@@ -1,0 +1,9 @@
+{
+  "filters": [],
+  "conditionalOperator": "AND",
+  "page": {
+    "pageNumber": 0,
+    "pageSize": null
+  },
+  "order": []
+}

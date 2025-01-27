@@ -1,0 +1,17 @@
+{
+  "filters": [
+    {
+      "attribute": "role.name",
+      "searchOperator": "EQ",
+      "value": "USER"
+    },
+    {
+      "attribute": "name",
+      "searchOperator": "LIKE",
+      "value": "B"
+    }
+  ],
+  "conditionalOperator": "AND",
+  "page": null,
+  "order": []
+}

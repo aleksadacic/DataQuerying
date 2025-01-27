@@ -3,6 +3,7 @@ package com.aleksadacic.springdataquerying.internal.specification;
 import com.aleksadacic.springdataquerying.api.exceptions.AttributeNotFoundException;
 import com.aleksadacic.springdataquerying.api.exceptions.JoinNotFoundException;
 import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
 
@@ -19,7 +20,7 @@ class SpecUtils {
                     .findFirst()
                     .orElse(null);
             if (join == null) {
-                throw new JoinNotFoundException(parts[0]);
+                join = tryToCreateJoin(root, parts);
             }
 
             Path<?> path = join;
@@ -38,5 +39,25 @@ class SpecUtils {
                 throw new AttributeNotFoundException(attribute);
             }
         }
+    }
+
+    private static <T> Join<?, ?> tryToCreateJoin(Root<T> root, String[] parts) throws JoinNotFoundException {
+        Join<?, ?> join = null;
+
+        // We exclude the last part of the attribute because that should be the attribute name of the last joined entity.
+        for (int i = 0; i < parts.length - 1; i++) {
+            String part = parts[i];
+
+            if (join == null) {
+                // Start from the root
+                join = root.join(part, JoinType.LEFT);
+            } else {
+                // Continue joining from the current join
+                join = join.join(part, JoinType.LEFT);
+            }
+        }
+
+        if (join == null) throw new JoinNotFoundException(String.join(".", parts));
+        return join;
     }
 }

@@ -1,0 +1,12 @@
+{
+  "filters": [
+    {
+      "attribute": "name",
+      "searchOperator": "EQ",
+      "value": "Alice"
+    }
+  ],
+  "conditionalOperator": "AND",
+  "page": null,
+  "order": []
+}

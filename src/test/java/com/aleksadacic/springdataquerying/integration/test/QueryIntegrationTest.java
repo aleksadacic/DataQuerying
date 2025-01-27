@@ -9,6 +9,7 @@ import com.aleksadacic.springdataquerying.integration.repository.RoleRepository;
 import com.aleksadacic.springdataquerying.integration.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.JoinType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -74,7 +75,7 @@ class QueryIntegrationTest {
     }
 
     @Test
-    void testSimpleWhereCondition() {
+    void testExecuteQuerySimpleWhereCondition() {
         // Build a query to find users with name 'Alice'
         Query<User> query = Query.where("name", "Alice");
 
@@ -88,10 +89,8 @@ class QueryIntegrationTest {
     }
 
     @Test
-    void testAndCondition() {
-        // Build a query to find users with role 'USER' and name 'Bob'
-        Query<User> query = Query.<User>where("role.name", "USER")
-                .and("name", "Bob");
+    void testExecuteQueryAndCondition() {
+        Query<User> query = Query.<User>where("email", "bob@example.com").and("name", "Bob");
 
         List<UserDTO> results = query.executeQuery(entityManager, User.class, UserDTO.class);
 
@@ -103,10 +102,8 @@ class QueryIntegrationTest {
     }
 
     @Test
-    void testOrCondition() {
-        // Build a query to find users with name 'Alice' or 'Charlie'
-        Query<User> query = Query.<User>where("name", "Alice")
-                .or("name", "Charlie");
+    void testExecuteQueryOrCondition() {
+        Query<User> query = Query.<User>where("name", "Alice").or("name", "Charlie");
 
         List<UserDTO> results = query.executeQuery(entityManager, User.class, UserDTO.class);
 
@@ -117,10 +114,8 @@ class QueryIntegrationTest {
     }
 
     @Test
-    void testJoinCondition() {
-        // Build a query to find users with role 'ADMIN'
+    void testExecuteQueryJoinCondition() {
         Query<User> query = Query.<User>get()
-                .join("role", jakarta.persistence.criteria.JoinType.INNER)
                 .and("role.name", "ADMIN");
 
         List<UserDTO> results = query.executeQuery(entityManager, User.class, UserDTO.class);
@@ -132,26 +127,21 @@ class QueryIntegrationTest {
     }
 
     @Test
-    void testDistinct() {
+    void testExecuteQueryDistinct() {
         // Suppose there are multiple users with the same role
         // Let's query distinct roles
-        Query<User> query = Query.<User>get()
-                .distinct()
-                .join("role", jakarta.persistence.criteria.JoinType.INNER);
+        Query<User> query = Query.<User>get().distinct().join("role", JoinType.INNER);
 
         List<UserDTO> results = query.executeQuery(entityManager, User.class, UserDTO.class);
-
-        // Since distinct is applied, the number of roles should be unique
-        // Here, ADMIN and USER, so 2 distinct roles
-        assertThat(results).hasSize(2);
+        assertThat(results).hasSize(3);
     }
 
     @Test
-    void testComplexQuery() {
-        // Build a complex query: (name = 'Alice' OR name = 'Bob') AND role = 'ADMIN'
-        Query<User> query = Query.<User>where("role.name", "ADMIN")
-                .and(Query.<User>get().or("name", "Alice")
-                        .or("name", "Bob"));
+    void testExecuteQueryComplexQuery() {
+        Query<User> query = Query.<User>get()
+                .join("role", JoinType.INNER)
+                .and("role.name", "ADMIN")
+                .and(Query.<User>get().or("name", "Alice").or("name", "Bob"));
 
         List<UserDTO> results = query.executeQuery(entityManager, User.class, UserDTO.class);
 
@@ -160,4 +150,91 @@ class QueryIntegrationTest {
         UserDTO aliceDTO = results.getFirst();
         assertThat(aliceDTO.getName()).isEqualTo("Alice");
     }
+
+    @Test
+    void testRepositoryFetchSimpleWhereCondition() {
+        Query<User> query = Query.where("name", "Alice");
+
+        // Use the repository to fetch data using the query
+        List<User> results = userRepository.findAll(query.buildSpecification());
+
+        // Assert that only Alice is returned
+        assertThat(results).hasSize(1);
+        User alice = results.getFirst();
+        assertThat(alice.getName()).isEqualTo("Alice");
+        assertThat(alice.getEmail()).isEqualTo("alice@example.com");
+    }
+
+    @Test
+    void testRepositoryFetchAndCondition() {
+        Query<User> query = Query.<User>where("email", "bob@example.com").and("name", "Bob");
+
+        // Use the repository to fetch data using the query
+        List<User> results = userRepository.findAll(query.buildSpecification());
+
+        // Assert that only Bob is returned
+        assertThat(results).hasSize(1);
+        User bob = results.getFirst();
+        assertThat(bob.getName()).isEqualTo("Bob");
+        assertThat(bob.getEmail()).isEqualTo("bob@example.com");
+    }
+
+    @Test
+    void testRepositoryFetchOrCondition() {
+        Query<User> query = Query.<User>where("name", "Alice").or("name", "Charlie");
+
+        // Use the repository to fetch data using the query
+        List<User> results = userRepository.findAll(query.buildSpecification());
+
+        // Assert that Alice and Charlie are returned
+        assertThat(results).hasSize(2);
+        assertThat(results).extracting(User::getName)
+                .containsExactlyInAnyOrder("Alice", "Charlie");
+    }
+
+    @Test
+    void testRepositoryFetchJoinCondition() {
+        Query<User> query = Query.<User>get().join("role", JoinType.INNER).and("role.name", "ADMIN");
+
+        // Use the repository to fetch data using the query
+        List<User> results = userRepository.findAll(query.buildSpecification());
+
+        // Assert that only Alice is returned
+        assertThat(results).hasSize(1);
+        User alice = results.getFirst();
+        assertThat(alice.getName()).isEqualTo("Alice");
+        assertThat(alice.getRole().getName()).isEqualTo("ADMIN");
+    }
+
+    @Test
+    void testRepositoryFetchComplexQuery() {
+        Query<User> query = Query.<User>get()
+                .join("role", JoinType.INNER)
+                .and("role.name", "USER")
+                .and(Query.<User>get().or("name", "Alice").or("name", "Bob"));
+
+        // Use the repository to fetch data using the query
+        List<User> results = userRepository.findAll(query.buildSpecification());
+
+        // Assert that only Bob matches the conditions
+        assertThat(results).hasSize(1);
+        User bob = results.getFirst();
+        assertThat(bob.getName()).isEqualTo("Bob");
+        assertThat(bob.getRole().getName()).isEqualTo("USER");
+    }
+
+    @Test
+    void testRepositoryFetchDistinct() {
+        // Build a query to find distinct users based on roles
+        Query<User> query = Query.<User>get().distinct().join("role", JoinType.INNER);
+
+        // Use the repository to fetch data using the query
+        List<User> results = userRepository.findAll(query.buildSpecification());
+
+        // Assert that all users are returned (distinct by role)
+        assertThat(results).hasSize(3);
+        assertThat(results).extracting(User::getName)
+                .containsExactlyInAnyOrder("Alice", "Bob", "Charlie");
+    }
+
 }

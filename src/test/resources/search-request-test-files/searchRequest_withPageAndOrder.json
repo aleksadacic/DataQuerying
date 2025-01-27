@@ -1,0 +1,18 @@
+{
+  "filters": [],
+  "conditionalOperator": "AND",
+  "page": {
+    "pageNumber": 0,
+    "pageSize": 20
+  },
+  "order": [
+    {
+      "attribute": "name",
+      "sortOrder": "ASC"
+    },
+    {
+      "attribute": "email",
+      "sortOrder": "DESC"
+    }
+  ]
+}

@@ -2,6 +2,7 @@ package com.aleksadacic.springdataquerying.internal.specification;
 
 import com.aleksadacic.springdataquerying.api.exceptions.SpecificationBuilderException;
 import com.aleksadacic.springdataquerying.internal.utils.ReflectionUtils;
+import jakarta.persistence.Tuple;
 import jakarta.persistence.criteria.*;
 
 import java.util.Collection;
@@ -98,15 +99,24 @@ public class SpecificationEngine {
     }
 
     // Utility method to apply the selected fields to the CriteriaQuery
-    public static <T, R> void applySelection(Root<T> root, CriteriaQuery<R> query, CriteriaBuilder criteriaBuilder, Class<R> dtoClass) {
+    public static <T, R> void applySelection(Root<T> root, CriteriaQuery<Tuple> query, CriteriaBuilder criteriaBuilder, Class<R> dtoClass) {
+        // Get the list of fields based on the DTO's getters
         List<String> selectedFields = ReflectionUtils.getAttributeNamesFromGetters(dtoClass);
+
         if (!selectedFields.isEmpty()) {
+            // Create selections for the selected fields from the root entity
             List<? extends Selection<?>> selections = selectedFields.stream()
-                    .map(field -> (Selection<?>) root.get(field)) // Cast each field path to Selection<?>
+                    .map(field -> {
+                        Selection<?> selection = root.get(field);
+                        selection.alias(field);
+                        return selection;
+                    })
                     .toList();
 
-            CompoundSelection<R> compoundSelection = criteriaBuilder.construct(dtoClass, selections.toArray(Selection[]::new));
+            // Create a compound selection based on the ordered selections
+            CompoundSelection<Tuple> compoundSelection = criteriaBuilder.tuple(selections.toArray(new Selection[0]));
             query.select(compoundSelection);
         }
     }
+
 }
