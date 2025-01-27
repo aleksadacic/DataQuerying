@@ -41,6 +41,7 @@
             <version>2.18.0</version>
         </dependency>
 
+        <!-- Test dependencies -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -53,7 +54,30 @@
             <version>5.11.0</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>2.3.232</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>6.0.0</version> <!-- Ensure compatibility with your Spring Data JPA version -->
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.23.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>6.2.7.Final</version> <!-- Ensure compatibility with Spring Data JPA -->
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

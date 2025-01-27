@@ -1,5 +1,6 @@
-package com.aleksadacic.springdataquerying.internal.deserializers;
+package com.aleksadacic.springdataquerying.unit.internal.deserializers;
 
+import com.aleksadacic.springdataquerying.internal.deserializers.ConditionalOperatorDeserializer;
 import com.aleksadacic.springdataquerying.internal.enums.ConditionalOperator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;

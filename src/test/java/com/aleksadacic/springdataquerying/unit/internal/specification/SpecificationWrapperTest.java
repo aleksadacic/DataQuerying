@@ -1,18 +1,22 @@
-package com.aleksadacic.springdataquerying.internal.specification;
+package com.aleksadacic.springdataquerying.unit.internal.specification;
 
 import com.aleksadacic.springdataquerying.api.SearchOperator;
-import utils.Dto;
+import com.aleksadacic.springdataquerying.api.exceptions.AttributeNotFoundException;
+import com.aleksadacic.springdataquerying.api.exceptions.JoinNotFoundException;
+import com.aleksadacic.springdataquerying.internal.specification.Filter;
+import com.aleksadacic.springdataquerying.internal.specification.SpecificationWrapper;
 import jakarta.persistence.criteria.*;
+import jakarta.persistence.metamodel.Attribute;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import utils.Dto;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -275,5 +279,91 @@ class SpecificationWrapperTest {
         verify(inClause).value(1);
         verify(inClause).value(2);
         verify(inClause).value(3);
+    }
+
+    @Test
+    void testToPredicate_JoinNotFoundException() {
+        // 1) Suppose we have an attribute with a dot: "department.manager"
+        // but the root has no actual join named "department"
+        // => triggers JoinNotFoundException
+
+        Filter filter = new Filter("department.manager", SearchOperator.EQ, "Alice");
+        SpecificationWrapper<Dto> spec = new SpecificationWrapper<>(filter);
+
+        // root.getJoins() is empty => the code can't find "department"
+        when(root.getJoins()).thenReturn(java.util.Collections.emptySet());
+
+        // 2) Attempt to do toPredicate
+        // Because "department" join is not found, we expect a JoinNotFoundException
+        assertThrows(JoinNotFoundException.class,
+                () -> spec.toPredicate(root, query, criteriaBuilder));
+    }
+
+    @Test
+    void testToPredicate_AttributeNotFoundException() {
+        // 1) Single attribute (no dot), but root.get("someField") fails
+        // => triggers an AttributeNotFoundException
+
+        Filter filter = new Filter("nonExistentField", SearchOperator.EQ, "Bob");
+        SpecificationWrapper<Dto> spec = new SpecificationWrapper<>(filter);
+
+        // 2) We can simulate root.get(...) throwing an exception
+        when(root.get("nonExistentField")).thenThrow(new IllegalArgumentException("No such field"));
+
+        // 3) We expect AttributeNotFoundException from SpecUtils
+        assertThrows(AttributeNotFoundException.class,
+                () -> spec.toPredicate(root, query, criteriaBuilder));
+    }
+
+    @Test
+    void testToPredicate_JoinButAttributeNotFoundOnNestedPart() {
+        Join<Dto, Object> mockJoin = mock(Join.class);
+
+        // Suppose "department.manager.name"
+        // The code finds a join for "department" but not for "manager"
+        // or the next path call fails.
+        Filter filter = new Filter("department.manager.name", SearchOperator.EQ, "Bob");
+        SpecificationWrapper<Dto> spec = new SpecificationWrapper<>(filter);
+
+        Attribute attr = mock(Attribute.class);
+        when(attr.getName()).thenReturn("department");
+
+        // root.getJoins() has a single join named "department"
+        when(root.getJoins()).thenReturn(java.util.Set.of(mockJoin));
+        // We mock the join's attribute name = "department"
+        when(mockJoin.getAttribute()).thenReturn(attr);
+
+        // Now, the code tries to do `mockJoin.get("manager")`,
+        // let's say we throw an error or return null to trigger an "AttributeNotFoundException"
+        when(mockJoin.get("manager")).thenThrow(new IllegalArgumentException("manager not found"));
+
+        assertThrows(AttributeNotFoundException.class,
+                () -> spec.toPredicate(root, query, criteriaBuilder));
+    }
+
+    @Test
+    void testToPredicate_MappingException() {
+        // We'll define a scenario: maybe the SpecUtils or SpecificationEngine
+        // throws a "MappingException" if a type can't be cast to Comparable
+        // for GT, LT, etc.
+        Filter filter = new Filter("title", SearchOperator.GT, "someString");
+        SpecificationWrapper<Dto> spec = new SpecificationWrapper<>(filter);
+
+        // Suppose "title" is not a numeric or comparable field.
+        // We'll mock an Object path that can't be cast to Expression<? extends Comparable>
+        Path<String> titlePath = mock(Path.class);
+        when(root.<String>get("title")).thenReturn(titlePath);
+
+        // The code tries to do: (Expression<? extends Comparable>) titlePath
+        // or `criteriaBuilder.greaterThan(titlePath, 20)` => leads to ClassCastException
+        // We'll mimic that by just throwing a custom "MappingException"
+        doThrow(new RuntimeException("MappingException: cannot compare strings to numeric")).when(criteriaBuilder)
+                .greaterThan(any(Expression.class), (Comparable) any());
+
+        // Now we can check for that specific runtime exception or your custom exception
+        assertThrows(RuntimeException.class,
+                () -> spec.toPredicate(root, query, criteriaBuilder),
+                "Should throw a custom or runtime MappingException"
+        );
     }
 }

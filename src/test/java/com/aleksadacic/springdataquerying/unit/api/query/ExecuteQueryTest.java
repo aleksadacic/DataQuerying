@@ -1,4 +1,4 @@
-package com.aleksadacic.springdataquerying.api.query;
+package com.aleksadacic.springdataquerying.unit.api.query;
 
 import com.aleksadacic.springdataquerying.api.Query;
 import com.aleksadacic.springdataquerying.api.SearchOperator;

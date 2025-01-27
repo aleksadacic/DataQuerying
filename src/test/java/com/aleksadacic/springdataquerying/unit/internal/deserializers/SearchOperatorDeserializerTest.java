@@ -1,6 +1,7 @@
-package com.aleksadacic.springdataquerying.internal.deserializers;
+package com.aleksadacic.springdataquerying.unit.internal.deserializers;
 
 import com.aleksadacic.springdataquerying.api.SearchOperator;
+import com.aleksadacic.springdataquerying.internal.deserializers.SearchOperatorDeserializer;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import org.junit.jupiter.api.AfterEach;

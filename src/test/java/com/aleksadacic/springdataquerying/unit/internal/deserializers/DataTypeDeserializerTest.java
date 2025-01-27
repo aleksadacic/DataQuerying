@@ -1,6 +1,7 @@
-package com.aleksadacic.springdataquerying.internal.deserializers;
+package com.aleksadacic.springdataquerying.unit.internal.deserializers;
 
-import com.aleksadacic.springdataquerying.internal.enums.SortOrder;
+import com.aleksadacic.springdataquerying.internal.deserializers.DataTypeDeserializer;
+import com.aleksadacic.springdataquerying.internal.enums.DataType;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import org.junit.jupiter.api.AfterEach;
@@ -15,10 +16,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-class SortOrderDeserializerTest {
+class DataTypeDeserializerTest {
     private AutoCloseable closeable;
 
-    private SortOrderDeserializer deserializer;
+    private DataTypeDeserializer deserializer;
 
     @Mock
     private JsonParser jsonParser;
@@ -29,7 +30,7 @@ class SortOrderDeserializerTest {
     @BeforeEach
     void setUp() {
         closeable = MockitoAnnotations.openMocks(this);
-        deserializer = new SortOrderDeserializer();
+        deserializer = new DataTypeDeserializer();
     }
 
     @AfterEach
@@ -38,24 +39,24 @@ class SortOrderDeserializerTest {
     }
 
     @Test
-    void testDeserializeValidValue_ASC() throws IOException {
-        // Suppose SortOrder.ASC has .value = "ASC"
-        when(jsonParser.getText()).thenReturn("ASC");
-        SortOrder result = deserializer.deserialize(jsonParser, context);
-        assertEquals(SortOrder.ASC, result);
+    void testDeserializeValidValue_STRING() throws IOException {
+        // Suppose DataType.STRING has .value = "STRING"
+        when(jsonParser.getText()).thenReturn("STRING");
+        DataType result = deserializer.deserialize(jsonParser, context);
+        assertEquals(DataType.STRING, result);
     }
 
     @Test
-    void testDeserializeValidValue_descCaseInsensitive() throws IOException {
-        // Suppose SortOrder.DESC has .value = "DESC"
-        when(jsonParser.getText()).thenReturn("dEsC");
-        SortOrder result = deserializer.deserialize(jsonParser, context);
-        assertEquals(SortOrder.DESC, result);
+    void testDeserializeValidValue_numberCaseInsensitive() throws IOException {
+        // Suppose DataType.NUMBER has .value = "NUMBER"
+        when(jsonParser.getText()).thenReturn("nUmBeR");
+        DataType result = deserializer.deserialize(jsonParser, context);
+        assertEquals(DataType.NUMBER, result);
     }
 
     @Test
     void testDeserializeInvalidValue_throwsException() throws IOException {
-        when(jsonParser.getText()).thenReturn("XYZ");
+        when(jsonParser.getText()).thenReturn("FOO");
         assertThrows(IllegalArgumentException.class,
                 () -> deserializer.deserialize(jsonParser, context));
     }

@@ -24,7 +24,11 @@ class SpecUtils {
 
             Path<?> path = join;
             for (int i = 1; i < parts.length; i++) {
-                path = path.get(parts[i]);
+                try {
+                    path = path.get(parts[i]);
+                } catch (IllegalArgumentException e) {
+                    throw new AttributeNotFoundException(parts[i]);
+                }
             }
             return path;
         } else {

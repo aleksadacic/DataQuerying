@@ -1,9 +1,11 @@
-package com.aleksadacic.springdataquerying.internal.search;
+package com.aleksadacic.springdataquerying.unit.internal.search;
 
 import com.aleksadacic.springdataquerying.api.Query;
 import com.aleksadacic.springdataquerying.api.SearchOperator;
 import com.aleksadacic.springdataquerying.api.SearchRequest;
 import com.aleksadacic.springdataquerying.internal.enums.ConditionalOperator;
+import com.aleksadacic.springdataquerying.internal.search.FilterData;
+import com.aleksadacic.springdataquerying.internal.search.SearchRequestQueryTransformer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
