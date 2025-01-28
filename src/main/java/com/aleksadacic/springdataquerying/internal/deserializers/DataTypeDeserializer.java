@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 
 import java.io.IOException;
 
-@SuppressWarnings("unused")
 public class DataTypeDeserializer extends JsonDeserializer<DataType> {
     @Override
     public DataType deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {

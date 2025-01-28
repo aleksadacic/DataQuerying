@@ -1,5 +1,6 @@
-package com.aleksadacic.springdataquerying.internal.utils;
+package com.aleksadacic.springdataquerying.internal.specification;
 
+import com.aleksadacic.springdataquerying.internal.utils.ReflectionUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.Tuple;
 
@@ -8,7 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class QueryUtils {
+class QueryUtils {
     private QueryUtils() {
     }
 

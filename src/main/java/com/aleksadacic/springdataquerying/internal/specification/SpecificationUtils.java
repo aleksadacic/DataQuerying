@@ -7,8 +7,8 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
 
-class SpecUtils {
-    private SpecUtils() {
+class SpecificationUtils {
+    private SpecificationUtils() {
     }
 
     // Utility method to retrieve the correct Path based on attribute

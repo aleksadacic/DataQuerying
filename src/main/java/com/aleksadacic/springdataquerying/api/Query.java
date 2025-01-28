@@ -3,6 +3,8 @@ package com.aleksadacic.springdataquerying.api;
 import com.aleksadacic.springdataquerying.internal.specification.SpecificationQuery;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.JoinType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
@@ -168,6 +170,17 @@ public interface Query<T> {
      * @return A list of results mapped to the specified DTO class.
      */
     <R> List<R> executeQuery(EntityManager entityManager, Class<T> entityClass, Class<R> pojo);
+
+    /**
+     * Executes the query with all the applied conditions using the given {@link EntityManager} and returns a {@link Page}.
+     *
+     * @param entityManager The {@link EntityManager} to execute the query.
+     * @param entityClass   The type of the entity being queried.
+     * @param pojo          The class of the POJO to map the results to.
+     * @param <R>           The type of the result (POJO).
+     * @return A page of results mapped to the specified DTO class.
+     */
+    <R> Page<R> executeQuery(EntityManager entityManager, Class<T> entityClass, Class<R> pojo, PageRequest pageRequest);
 
     /**
      * Builds the {@link Specification} for the query, representing all the applied conditions.

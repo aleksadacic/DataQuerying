@@ -197,16 +197,65 @@ Execute the query with your repository, taking advantage of the PageRequest or S
 
 ## Advanced Usage
 
-- Nested Filters with AND/OR groups:
-  `FilterData` supports a list of child filters, which themselves can have nested filters. The library recursively
-  builds
-  a
-  combined `Specification` or `CriteriaQuery`.
+### Dynamically Enhancing a SearchRequest Before Execution
 
-- Joins: The `Query` object supports joins, e.g. `.join("attribute.subAttribute", JoinType.LEFT)`.
-- DTO Projection: Using `executeQuery(...)` allows you to project selected fields into a custom DTO class.
+One of the powerful features of this library is the ability to dynamically modify a SearchRequest at runtime before
+executing it. This is particularly useful when you need to apply additional filters or conditions based on business
+logic, user roles, or other dynamic factors.
 
-[//]: # (TODO primeri iz koda i da se definise sta je advanced)
+Example: Enhancing a SearchRequest in a Controller
+
+Imagine you receive a `SearchRequest` from the client but want to programmatically add conditions such as ensuring the
+user can only query their own organization, or adding global filters like "only active records." Here's how you can
+enhance the request and execute the query:
+
+```java
+
+@RestController
+@RequestMapping("/users")
+public class UserController {
+    @Autowired
+    private UserRepository userRepository;
+
+    @PostMapping("/search")
+    public List<User> enhancedSearch(@RequestBody SearchRequest request) {
+        // Step 1: Convert SearchRequest to Query
+        Query<User> query = request.getQuery();
+
+        // Step 2: Add additional conditions programmatically
+        query.and("status", SearchOperator.EQ, "ACTIVE"); // Global filter
+        query.and("organizationId", SearchOperator.EQ, getCurrentUserOrganizationId()); // User-specific filter
+
+        // Step 3: Build Specification and execute query
+        Specification<User> spec = query.buildSpecification();
+        return userRepository.findAll(spec, request.getPageRequest());
+    }
+
+    private Long getCurrentUserOrganizationId() {
+        // Simulate fetching current user's organization ID
+        return 123L;
+    }
+}
+```
+
+### Combining SearchRequest with Joins and Nested Filters
+
+This approach also supports complex query scenarios, such as adding join conditions dynamically. Then, you can retrieve
+a list of Dto's as `List<Dto>` to return as a response:
+
+```java
+@PostMapping("/searchWithJoins")
+public Page<UserDTO> searchWithJoins(@RequestBody SearchRequest request) {
+    // Convert SearchRequest to Query
+    Query<User> query = request.getQuery();
+
+    // Add a join condition dynamically
+   query = query.join("role", JoinType.INNER).and("role.name", SearchOperator.EQ, "ADMIN");
+    
+    return query.executeQuery(entityManager, User.class, UserDTO.class, request.getPageRequest());
+}
+
+```
 
 > [!NOTE]
 > Classes under `internal` package should only be used if you know and understand the
@@ -229,18 +278,14 @@ errors in your REST APIs.
   happen if you reference a nested path (e.g., `user.address.city`) and one of the segments isn’t a valid association.
 
 
-- `MappingException` (`RuntimeException`)  
-  Signals a more general mapping error. For example, if the library is unable to convert an input value into the correct
-  type needed for the query or if there’s a mismatch between the filter type and the entity’s field type.
-
-
 - `SpecificationBuilderException` (`RuntimeException`)  
   This is a wrapper for the `RuntimeException`. Thrown if there is an error in building the `Specification`—for example,
   conflicting operators, logical errors in
   filter groupings, or issues that prevent the library from creating a valid JPA criteria.
 
-In most cases, these exceptions indicate an issue with how your filters or joins are configured. Proper validation of
-incoming request data (e.g., attribute names, operator types) can help avoid them.
+> [!NOTE]
+> In most cases, these exceptions indicate an issue with how your filters or joins are configured. Proper validation of
+> incoming request data (e.g., attribute names, operator types) can help avoid them.
 
 ## Package Structure
 
@@ -258,7 +303,8 @@ incoming request data (e.g., attribute names, operator types) can help avoid the
     └── utils
 ```
 
-- Internal packages contain supporting classes (e.g., `FilterData`, `SpecificationEngine`) not intended for direct use.
+- Internal packages contain supporting classes (e.g., `SpecificationQuery`, `SpecificationEngine`) not intended for
+  direct use.
 - Only api classes are part of the stable, public-facing API.
 
 ## Contributing

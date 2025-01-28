@@ -19,7 +19,7 @@ public class SpecificationWrapper<T> implements Specification<T> {
             return null;
         }
 
-        Path<?> fieldPath = SpecUtils.getPath(root, filter.getAttribute());
+        Path<?> fieldPath = SpecificationUtils.getPath(root, filter.getAttribute());
         return switch (filter.getOperator()) {
             case EQ -> SpecificationEngine.eq(filter, criteriaBuilder, fieldPath);
             case NOT_EQ -> SpecificationEngine.notEq(filter, criteriaBuilder, fieldPath);

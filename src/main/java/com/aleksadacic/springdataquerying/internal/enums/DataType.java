@@ -4,7 +4,6 @@ import com.aleksadacic.springdataquerying.internal.deserializers.DataTypeDeseria
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(using = DataTypeDeserializer.class)
-@SuppressWarnings("unused")
 public enum DataType {
     STRING("STRING"),
     NUMBER("NUMBER"),
