@@ -172,8 +172,8 @@ git push origin feature/add-feature-x
 
 Before submitting your pull request, make sure you:
 
-- [x] Have followed the coding style of the project.
-- [x] Updated documentation (if applicable).
-- [x] Added or updated tests (if applicable).
-- [x] Ensured all tests pass (npm test, mvn test, etc., depending on the project).
+- [] Have followed the coding style of the project.
+- [] Updated documentation (if applicable).
+- [] Added or updated tests (if applicable).
+- [] Ensured all tests pass (npm test, mvn test, etc., depending on the project).
 
