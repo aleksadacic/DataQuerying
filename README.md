@@ -238,20 +238,21 @@ public class UserController {
 }
 ```
 
-### Combining SearchRequest with Joins and Nested Filters
+### Executing query with projection and pagination
 
 This approach also supports complex query scenarios, such as adding join conditions dynamically. Then, you can retrieve
-a list of Dto's as `List<Dto>` to return as a response:
+a list of projections as `List<Dto>` to return as a response:
 
 ```java
+
 @PostMapping("/searchWithJoins")
 public Page<UserDTO> searchWithJoins(@RequestBody SearchRequest request) {
     // Convert SearchRequest to Query
     Query<User> query = request.getQuery();
 
     // Add a join condition dynamically
-   query = query.join("role", JoinType.INNER).and("role.name", SearchOperator.EQ, "ADMIN");
-    
+    query = query.join("role", JoinType.INNER).and("role.name", SearchOperator.EQ, "ADMIN");
+
     return query.executeQuery(entityManager, User.class, UserDTO.class, request.getPageRequest());
 }
 
