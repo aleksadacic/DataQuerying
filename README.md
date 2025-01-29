@@ -33,17 +33,6 @@ and `SearchOperator`.
 ## Installation
 
 <details>
-<summary>Gradle</summary>
-
-```groovy
-dependencies {
-    implementation 'com.aleksadacic.dataquerying:data-querying:YOUR_VERSION'
-}
-```
-
-</details>
-
-<details>
 <summary>Maven</summary>
 
 ```xml
