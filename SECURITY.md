@@ -5,7 +5,7 @@
 The following versions of DataQuerying are currently supported and receive security updates:
 
 | Version | Supported          |
-| ------- | ------------------ |
+|---------|--------------------|
 | 1.0.x   | :white_check_mark: |
 
 ## Reporting a Vulnerability
@@ -15,7 +15,7 @@ If you discover a security vulnerability, please follow these steps:
    - Avoid publicly disclosing the vulnerability (e.g., opening an issue or PR) to prevent potential exploitation.
 
 2. **Contact Us Securely**:
-   - Send an email to **[aleksa.dacic99@gmail.com](mailto:aleksa.dacic99@gmail.com)** with the following information:
+   - Email **[aleksa.dacic99@gmail.com](mailto:aleksa.dacic99@gmail.com)** with the following information:
      - A detailed description of the vulnerability.
      - Steps to reproduce the issue.
      - The potential impact of the vulnerability.
