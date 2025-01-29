@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@SuppressWarnings("JpaDataSourceORMInspection")
 @Entity
 @Table(name = "roles")
 @Getter

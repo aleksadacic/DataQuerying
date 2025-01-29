@@ -97,78 +97,41 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/aleksa
     - Click the Fork button in the top-right corner to create your copy of the repository.
   
 2. Clone Your Fork
-  ```bash
-  git clone https://github.com/your-username/[repository-name].git
-  cd [repository-name]
-  ```
+      ```bash
+      git clone https://github.com/aleksadacic/DataQuerying.git
+      cd DataQuerying
+      ```
 3. Create a New Branch
-    - Use a descriptive name for your branch (e.g., feature/add-feature-x or bugfix/fix-issue-y):
-  ```bash
-  git checkout -b feature/add-feature-x
-  ```
+   - Use a descriptive name for your branch (e.g., feature/add-feature-x or bugfix/fix-issue-y):
+    ```bash 
+    git checkout -b feature/add-feature-x
+    ```
+
 4. Make Your Changes
-    - Make sure your changes adhere to the project's coding standards.
-    - Add or update tests if applicable.
-    - Test your changes locally to ensure they work as expected.
+   - Make sure your changes adhere to the project's coding standards.
+   - Add or update tests if applicable.
+   - Test your changes locally to ensure they work as expected.
 
 5. Commit Your Changes
      - Write clear and concise commit messages:
-  ```bash
-  git add .
-  git commit -m "Add feature X to improve Y"
-  ```
+    ```bash 
+    git add .
+    git commit -m "Add feature X to improve Y"
+    ```
 
 6. Push Your Branch to Your Fork
-  ```bash
-  git push origin feature/add-feature-x
-  ```
-Here’s a CONTRIBUTING.md template that clearly explains how users can contribute code to your project using pull requests:
-Contributing to [Project Name]
-
-Thank you for your interest in contributing to [Project Name]! We welcome contributions to improve the project, whether it's fixing bugs, adding new features, or improving documentation. Follow these steps to get started:
-🚀 How to Contribute Code
-1. Fork the Repository
-
-    Go to the project repository on GitHub.
-    Click the Fork button in the top-right corner to create your copy of the repository.
-
-2. Clone Your Fork
-
-git clone https://github.com/your-username/[repository-name].git
-cd [repository-name]
-
-3. Create a New Branch
-
-    Use a descriptive name for your branch (e.g., feature/add-feature-x or bugfix/fix-issue-y):
-
-git checkout -b feature/add-feature-x
-
-4. Make Your Changes
-
-    Make sure your changes adhere to the project's coding standards.
-    Add or update tests if applicable.
-    Test your changes locally to ensure they work as expected.
-
-5. Commit Your Changes
-
-    Write clear and concise commit messages:
-
-git add .
-git commit -m "Add feature X to improve Y"
-
-6. Push Your Branch to Your Fork
-
-git push origin feature/add-feature-x
+      ```bash
+      git push origin feature/add-feature-x
+      ```
 
 7. Open a Pull Request
+   1) Go to the original repository on GitHub.
+   2) Click Pull Requests > New Pull Request. 
+   3) Select your branch and provide a detailed description of your changes:
+        - Explain the problem you're solving or the feature you're adding.
+        - Link to any related issues (e.g., Closes #123).
 
-    1) Go to the original repository on GitHub.
-    2) Click Pull Requests > New Pull Request.
-    3) Select your branch and provide a detailed description of your changes:
-       - Explain the problem you're solving or the feature you're adding.
-       - Link to any related issues (e.g., Closes #123).
-
-✅ Pull Request Checklist
+#### ✅ Pull Request Checklist
 
 Before submitting your pull request, make sure you:
 
