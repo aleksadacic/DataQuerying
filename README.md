@@ -1,4 +1,4 @@
-# Spring Data Querying
+# Data Querying
 
 A *lightweight library*
 for building dynamic, type-safe queries in Spring Data JPA.  
@@ -37,7 +37,7 @@ and `SearchOperator`.
 
 ```groovy
 dependencies {
-    implementation 'com.aleksadacic.springdataquerying:spring-data-querying:YOUR_VERSION'
+    implementation 'com.aleksadacic.dataquerying:data-querying:YOUR_VERSION'
 }
 ```
 
@@ -49,9 +49,9 @@ dependencies {
 ```xml
 
 <dependency>
-    <groupId>com.aleksadacic.springdataquerying</groupId>
-    <artifactId>spring-data-querying</artifactId>
-    <version>YOUR_VERSION</version>
+    <groupId>com.aleksadacic.dataqueryingcom.aleksadacic.dataquerying</groupId>
+    <artifactId>data-querying</artifactId>
+    <version>1.0.0</version>
 </dependency>
 ```
 
@@ -291,7 +291,7 @@ errors in your REST APIs.
 ## Package Structure
 
 ```
-  com.aleksadacic.springdataquerying
+  com.aleksadacic.dataquerying
   ├── api
     ├── exceptions
   │ ├── Query.java // Public: dynamic query builder

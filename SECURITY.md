@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-The following versions of SpringDataQuerying are currently supported and receive security updates:
+The following versions of DataQuerying are currently supported and receive security updates:
 
 | Version | Supported          |
 | ------- | ------------------ |

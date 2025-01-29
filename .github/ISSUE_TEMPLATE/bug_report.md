@@ -27,7 +27,7 @@ If applicable, add screenshots to help explain your problem.
  - OS: [e.g. Windows 11]
 - Java version
 - Spring version
-- SpringDataQuerying version
+- DataQuerying library version
 
 **Additional context**
 Add any other context about the problem here.
