@@ -8,6 +8,7 @@ and `SearchOperator`.
 ## Table of Contents
 
 - [Features](#features)
+- [Compatibility](#compatibility)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Core Concepts](#core-concepts)
@@ -26,9 +27,23 @@ and `SearchOperator`.
 ## Features
 
 - **Dynamic Query Building**: Create complex JPA queries with an intuitive, fluent API.
-- **Nested Filters**: Build recursive AND/OR conditions through `SearchRequest`.
-- **Minimal Boilerplate**: No need to hand-write every `specification<T>` --the library does it for you.
-- **Integration with Spring Data**: Seamlessly use `specification<T>`, `Pageable`, etc.
+- **Search request DTO** for your endpoints out of the box which you can convert to `Specification` object.
+- **Nested Filters**: Build recursive AND/OR conditions.
+- **Multiple Joins**: Deep join. Filter by your joined attribute (e.g. user.card.bank.bankName).
+- **Minimal Boilerplate**: No need to hand-write every `Specification` --the library does it for you.
+- **Projections** simplified. No need to write `@Query` in your repository, just provide a POJO.
+- **Integration with Spring Data**: Seamlessly use `Specification`, `Pageable`, etc.
+
+## Compatibility
+
+This library is compatible with:
+
+- **Spring Framework**: 6.2.2+
+- **Spring Boot**: 3.4.2+
+- **Java Version**: 17 - 23
+
+For more compatibility details
+visit [this page](https://github.com/aleksadacic/DataQuerying/blob/master/COMPATIBILITY.md).
 
 ## Installation
 
@@ -36,6 +51,7 @@ and `SearchOperator`.
 <summary>Maven</summary>
 
 ```xml
+
 <dependency>
     <groupId>io.github.aleksadacic.dataquerying</groupId>
     <artifactId>DataQuerying</artifactId>
@@ -298,8 +314,10 @@ errors in your REST APIs.
 
 ## Contributing
 
-Contributions are encouraged and accepted. To view more information about contributon visit [this page](https://github.com/aleksadacic/DataQuerying/blob/master/CONTRIBUTING.md).
+Contributions are encouraged and accepted. To view more information about contributon
+visit [this page](https://github.com/aleksadacic/DataQuerying/blob/master/CONTRIBUTING.md).
 
 ## License
 
-This project is licensed under the [Apache-2.0 license](LICENSE.txt). Feel free to modify and distribute under these terms.
+This project is licensed under the [Apache-2.0 license](LICENSE.txt). Feel free to modify and distribute under these
+terms.
