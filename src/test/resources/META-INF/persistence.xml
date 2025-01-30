@@ -2,9 +2,9 @@
 <persistence xmlns="https://jakarta.ee/xml/ns/persistence" version="3.0">
     <persistence-unit name="test-unit" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        <class>com.aleksadacic.dataquerying.integration.model.User</class>
-        <class>com.aleksadacic.dataquerying.integration.model.Role</class>
-        <class>com.aleksadacic.dataquerying.integration.dto.UserDTO</class>
+        <class>io.github.aleksadacic.dataquerying.integration.model.User</class>
+        <class>io.github.aleksadacic.dataquerying.integration.model.Role</class>
+        <class>io.github.aleksadacic.dataquerying.integration.dto.UserDTO</class>
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
             <property name="jakarta.persistence.jdbc.url" value="jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1"/>

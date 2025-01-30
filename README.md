@@ -38,7 +38,7 @@ and `SearchOperator`.
 ```xml
 
 <dependency>
-    <groupId>com.aleksadacic.dataqueryingcom.aleksadacic.dataquerying</groupId>
+    <groupId>io.github.aleksadacic.dataqueryingio.github.aleksadacic.dataquerying</groupId>
     <artifactId>data-querying</artifactId>
     <version>1.0.0</version>
 </dependency>
@@ -280,7 +280,7 @@ errors in your REST APIs.
 ## Package Structure
 
 ```
-  com.aleksadacic.dataquerying
+  io.github.aleksadacic.dataquerying
   ├── api
     ├── exceptions
   │ ├── Query.java // Public: dynamic query builder
