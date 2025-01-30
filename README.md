@@ -36,7 +36,6 @@ and `SearchOperator`.
 <summary>Maven</summary>
 
 ```xml
-
 <dependency>
     <groupId>io.github.aleksadacic.dataquerying</groupId>
     <artifactId>DataQuerying</artifactId>
