@@ -38,8 +38,8 @@ and `SearchOperator`.
 ```xml
 
 <dependency>
-    <groupId>io.github.aleksadacic.dataqueryingio.github.aleksadacic.dataquerying</groupId>
-    <artifactId>data-querying</artifactId>
+    <groupId>io.github.aleksadacic.dataquerying</groupId>
+    <artifactId>DataQuerying</artifactId>
     <version>1.0.0</version>
 </dependency>
 ```
@@ -299,12 +299,7 @@ errors in your REST APIs.
 
 ## Contributing
 
-1. Fork the repository and create your feature branch `git checkout -b feature/new-cool-feature`.
-2. Commit your changes `git commit -m 'Add some new feature'`.
-3. Push to the branch `git push origin feature/new-cool-feature`.
-4. Create a Pull Request.
-
-Issues and bug reports are welcome—please file them via the GitHub Issues section.
+Contributions are encouraged and accepted. To view more information about contributon visit [this page](https://github.com/aleksadacic/DataQuerying/blob/master/CONTRIBUTING.md).
 
 ## License
 
