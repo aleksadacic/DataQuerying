@@ -314,7 +314,7 @@ errors in your REST APIs.
 
 ## Contributing
 
-Contributions are encouraged and accepted. To view more information about contributon
+Contributions are encouraged and accepted. To view more information about contribution
 visit [this page](https://github.com/aleksadacic/DataQuerying/blob/master/CONTRIBUTING.md).
 
 ## License

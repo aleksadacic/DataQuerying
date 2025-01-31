@@ -1,8 +1,8 @@
 package io.github.aleksadacic.dataquerying.internal.specification;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.aleksadacic.dataquerying.api.Query;
 import io.github.aleksadacic.dataquerying.api.SearchOperator;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.TypedQuery;
@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("unused")
 public class SpecificationQuery<T> implements Query<T> {
     private Specification<T> specification;
     private boolean distinct = false;
@@ -148,8 +147,6 @@ public class SpecificationQuery<T> implements Query<T> {
     public <R> List<R> executeQuery(EntityManager entityManager, Class<T> entityClass, Class<R> pojo) {
         Map.Entry<CriteriaQuery<Tuple>, Root<T>> preparedQueryObjects = ExecuteQueryUtils.prepareCriteriaQuery(entityManager, entityClass, pojo, distinct, specification);
         CriteriaQuery<Tuple> criteriaQuery = preparedQueryObjects.getKey();
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        Root<T> root = preparedQueryObjects.getValue();
 
         // Execute the query
         TypedQuery<Tuple> query = entityManager.createQuery(criteriaQuery);

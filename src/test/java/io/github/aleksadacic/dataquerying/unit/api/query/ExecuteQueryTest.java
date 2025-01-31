@@ -2,6 +2,8 @@ package io.github.aleksadacic.dataquerying.unit.api.query;
 
 import io.github.aleksadacic.dataquerying.api.Query;
 import io.github.aleksadacic.dataquerying.api.SearchOperator;
+import io.github.aleksadacic.dataquerying.utils.Dto;
+import io.github.aleksadacic.dataquerying.utils.DtoMinimal;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.TypedQuery;
@@ -16,8 +18,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import io.github.aleksadacic.dataquerying.utils.Dto;
-import io.github.aleksadacic.dataquerying.utils.DtoMinimal;
 
 import java.util.Collections;
 import java.util.List;
@@ -47,6 +47,8 @@ class ExecuteQueryTest {
     private Path agePath;
     @Mock
     private Path namePath;
+    @Mock
+    private Path superuserPath;
 
     @Mock
     private CriteriaQuery<Long> countCriteriaQuery;
@@ -85,6 +87,10 @@ class ExecuteQueryTest {
         // Stub the path for "age"
         when(root.get("age")).thenReturn(agePath);
         when(criteriaBuilder.greaterThan(agePath, 20)).thenReturn(mock(Predicate.class));
+
+        // Stub the path for "age"
+        when(root.get("superuser")).thenReturn(superuserPath);
+        when(criteriaBuilder.equal(superuserPath, "admin")).thenReturn(mock(Predicate.class));
 
         // Stub the path for "name" (for selection to avoid null)
         when(root.get("name")).thenReturn(namePath);
@@ -178,5 +184,34 @@ class ExecuteQueryTest {
         verify(countCriteriaQuery).select(countExpression);
         verify(entityManager).createQuery(countCriteriaQuery);
         verify(countTypedQuery).getSingleResult();
+    }
+
+    @Test
+    void testExecuteQuery_ageGreaterThan20AndSuperuserTrue() {
+        // 1) Build the Query
+        Query<Dto> query = Query.<Dto>where("age", SearchOperator.GT, 20).and("superuser", true);
+
+        // 2) Execute
+        List<DtoMinimal> result = query.executeQuery(entityManager, Dto.class, DtoMinimal.class);
+
+        // 3) Basic checks
+        assertNotNull(result, "Result list should not be null");
+        assertEquals(1, result.size(), "Should have exactly one row");
+        assertEquals("John", result.getFirst().getName());
+
+        // 4) Verify we set the single predicate in "where(...)"
+        verify(criteriaQuery).where(singlePredicateCaptor.capture());
+        Predicate usedPredicate = singlePredicateCaptor.getValue();
+        assertNotNull(usedPredicate, "Predicate must not be null");
+
+        // 5) We can also confirm the path usage
+        verify(root).get("age");
+        verify(criteriaBuilder).greaterThan(agePath, 20);
+
+        verify(root).get("superuser");
+        verify(criteriaBuilder).equal(superuserPath, true);
+
+        // Optionally verify selection call if needed
+        verify(criteriaQuery).select(any()); // The actual "select(...)" call
     }
 }

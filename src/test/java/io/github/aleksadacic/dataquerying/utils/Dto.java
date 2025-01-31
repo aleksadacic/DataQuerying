@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class Dto {
     private Integer age;
     private String name;
+    private Boolean superuser;
 }

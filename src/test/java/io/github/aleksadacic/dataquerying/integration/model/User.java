@@ -23,6 +23,8 @@ public class User {
 
     private String email;
 
+    private boolean superuser;
+
     @SuppressWarnings("JpaDataSourceORMInspection")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")

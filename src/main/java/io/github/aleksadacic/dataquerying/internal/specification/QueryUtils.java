@@ -1,7 +1,7 @@
 package io.github.aleksadacic.dataquerying.internal.specification;
 
-import io.github.aleksadacic.dataquerying.internal.utils.ReflectionUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.aleksadacic.dataquerying.internal.utils.ReflectionUtils;
 import jakarta.persistence.Tuple;
 
 import java.util.ArrayList;
@@ -14,16 +14,20 @@ class QueryUtils {
     }
 
     public static <R> List<R> convertToDtoList(Class<R> dtoClass, List<Map<String, Object>> mappedResults, ObjectMapper mapper) {
+
         List<R> results = new ArrayList<>();
         for (Map<String, Object> mappedResult : mappedResults) {
-            results.add(mapper.convertValue(mappedResult, dtoClass));
+            if (dtoClass.isInterface()) {
+                results.add(ReflectionUtils.createProxy(dtoClass, mappedResult));
+            } else {
+                results.add(mapper.convertValue(mappedResult, dtoClass));
+            }
         }
         return results;
     }
 
     public static <R> List<Map<String, Object>> mapTuplesToFieldValues(List<Tuple> tuples, Class<R> dtoClass) {
-        // Get the list of fields based on the DTO's getters
-        List<String> selectedFields = ReflectionUtils.getAttributeNamesFromGetters(dtoClass);
+        List<String> selectedFields = ReflectionUtils.getAttributeNames(dtoClass);
 
         // Convert each tuple to a map of field names to values
         return tuples.stream()

@@ -1,8 +1,9 @@
 package io.github.aleksadacic.dataquerying.integration.test;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.github.aleksadacic.dataquerying.api.Query;
 import io.github.aleksadacic.dataquerying.integration.config.TestConfig;
-import io.github.aleksadacic.dataquerying.integration.dto.UserDTO;
+import io.github.aleksadacic.dataquerying.integration.dto.UserDto;
 import io.github.aleksadacic.dataquerying.integration.model.Role;
 import io.github.aleksadacic.dataquerying.integration.model.User;
 import io.github.aleksadacic.dataquerying.integration.repository.RoleRepository;
@@ -66,6 +67,7 @@ class QueryIntegrationTest {
         bob.setName("Bob");
         bob.setEmail("bob@example.com");
         bob.setRole(userRole);
+        bob.setSuperuser(true);
         userRepository.save(bob);
 
         User charlie = new User();
@@ -83,11 +85,11 @@ class QueryIntegrationTest {
         // Build a query to find users with name 'Alice'
         Query<User> query = Query.where("name", "Alice");
 
-        List<UserDTO> results = query.executeQuery(entityManager, User.class, UserDTO.class);
+        List<UserDto> results = query.executeQuery(entityManager, User.class, UserDto.class);
 
         // Assert that only Alice is returned
         assertThat(results).hasSize(1);
-        UserDTO aliceDTO = results.getFirst();
+        UserDto aliceDTO = results.getFirst();
         assertThat(aliceDTO.getName()).isEqualTo("Alice");
         assertThat(aliceDTO.getEmail()).isEqualTo("alice@example.com");
     }
@@ -96,11 +98,11 @@ class QueryIntegrationTest {
     void testExecuteQueryAndCondition() {
         Query<User> query = Query.<User>where("email", "bob@example.com").and("name", "Bob");
 
-        List<UserDTO> results = query.executeQuery(entityManager, User.class, UserDTO.class);
+        List<UserDto> results = query.executeQuery(entityManager, User.class, UserDto.class);
 
         // Assert that only Bob is returned
         assertThat(results).hasSize(1);
-        UserDTO bobDTO = results.getFirst();
+        UserDto bobDTO = results.getFirst();
         assertThat(bobDTO.getName()).isEqualTo("Bob");
         assertThat(bobDTO.getEmail()).isEqualTo("bob@example.com");
     }
@@ -109,11 +111,11 @@ class QueryIntegrationTest {
     void testExecuteQueryOrCondition() {
         Query<User> query = Query.<User>where("name", "Alice").or("name", "Charlie");
 
-        List<UserDTO> results = query.executeQuery(entityManager, User.class, UserDTO.class);
+        List<UserDto> results = query.executeQuery(entityManager, User.class, UserDto.class);
 
         // Assert that Alice and Charlie are returned
         assertThat(results).hasSize(2);
-        assertThat(results).extracting(UserDTO::getName)
+        assertThat(results).extracting(UserDto::getName)
                 .containsExactlyInAnyOrder("Alice", "Charlie");
     }
 
@@ -122,11 +124,11 @@ class QueryIntegrationTest {
         Query<User> query = Query.<User>get()
                 .and("role.name", "ADMIN");
 
-        List<UserDTO> results = query.executeQuery(entityManager, User.class, UserDTO.class);
+        List<UserDto> results = query.executeQuery(entityManager, User.class, UserDto.class);
 
         // Assert that only Alice is returned
         assertThat(results).hasSize(1);
-        UserDTO aliceDTO = results.getFirst();
+        UserDto aliceDTO = results.getFirst();
         assertThat(aliceDTO.getName()).isEqualTo("Alice");
     }
 
@@ -136,7 +138,7 @@ class QueryIntegrationTest {
         // Let's query distinct roles
         Query<User> query = Query.<User>get().distinct().join("role", JoinType.INNER);
 
-        List<UserDTO> results = query.executeQuery(entityManager, User.class, UserDTO.class);
+        List<UserDto> results = query.executeQuery(entityManager, User.class, UserDto.class);
         assertThat(results).hasSize(3);
     }
 
@@ -147,11 +149,11 @@ class QueryIntegrationTest {
                 .and("role.name", "ADMIN")
                 .and(Query.<User>get().or("name", "Alice").or("name", "Bob"));
 
-        List<UserDTO> results = query.executeQuery(entityManager, User.class, UserDTO.class);
+        List<UserDto> results = query.executeQuery(entityManager, User.class, UserDto.class);
 
         // Only Alice should match
         assertThat(results).hasSize(1);
-        UserDTO aliceDTO = results.getFirst();
+        UserDto aliceDTO = results.getFirst();
         assertThat(aliceDTO.getName()).isEqualTo("Alice");
     }
 
@@ -252,7 +254,7 @@ class QueryIntegrationTest {
         ));
 
         // Execute the query with pagination
-        Page<UserDTO> pageResult = query.executeQuery(entityManager, User.class, UserDTO.class, pageRequest);
+        Page<UserDto> pageResult = query.executeQuery(entityManager, User.class, UserDto.class, pageRequest);
 
         // Assert page metadata
         assertThat(pageResult).isNotNull();
@@ -262,9 +264,9 @@ class QueryIntegrationTest {
         assertThat(pageResult.getSize()).isEqualTo(1); // Page size
 
         // Assert the content order
-        List<UserDTO> content = pageResult.getContent();
+        List<UserDto> content = pageResult.getContent();
         assertThat(content).hasSize(1);
-        assertThat(content).extracting(UserDTO::getName, UserDTO::getEmail)
+        assertThat(content).extracting(UserDto::getName, UserDto::getEmail)
                 .containsExactly(
                         tuple("Bob", "bob@example.com")
                 );
@@ -278,7 +280,7 @@ class QueryIntegrationTest {
         PageRequest pageRequest = PageRequest.of(1, 1, Sort.by(Sort.Order.asc("name")));
 
         // Execute the query with pagination
-        Page<UserDTO> pageResult = query.executeQuery(entityManager, User.class, UserDTO.class, pageRequest);
+        Page<UserDto> pageResult = query.executeQuery(entityManager, User.class, UserDto.class, pageRequest);
 
         // Assert page metadata
         assertThat(pageResult).isNotNull();
@@ -288,10 +290,43 @@ class QueryIntegrationTest {
         assertThat(pageResult.getSize()).isEqualTo(1); // Page size
 
         // Assert the content on the second page
-        List<UserDTO> content = pageResult.getContent();
+        List<UserDto> content = pageResult.getContent();
         assertThat(content).hasSize(1);
-        assertThat(content).extracting(UserDTO::getName)
+        assertThat(content).extracting(UserDto::getName)
                 .containsExactly("Charlie");
+    }
+
+    @Test
+    void testExecuteQueryWithMultipleConditions() {
+        Query<User> query = Query.<User>where("name", "Bob").and("superuser", true);
+
+        // Execute the query with pagination
+        List<UserDto> result = query.executeQuery(entityManager, User.class, UserDto.class);
+
+        // Assert page metadata
+        assertThat(result).isNotNull().hasSize(1);
+        assertThat(result).extracting(UserDto::getName).containsExactly("Bob");
+        assertThat(result).extracting(UserDto::isSuperuser).containsExactly(true);
+    }
+
+    @Test
+    void testExecuteQueryWithMultipleConditions_interfaceDto() {
+        @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@class")
+        interface X {
+            String getName();
+
+            boolean getSuperuser();
+        }
+
+        Query<User> query = Query.<User>where("name", "Bob").and("superuser", true);
+
+        // Execute the query with pagination
+        List<X> result = query.executeQuery(entityManager, User.class, X.class);
+
+        // Assert page metadata
+        assertThat(result).isNotNull().hasSize(1);
+        assertThat(result).extracting(X::getName).containsExactly("Bob");
+        assertThat(result).extracting(X::getSuperuser).containsExactly(true);
     }
 
     @Test
@@ -305,7 +340,7 @@ class QueryIntegrationTest {
         PageRequest pageRequest = PageRequest.of(0, 1, Sort.by(Sort.Order.desc("name")));
 
         // Execute the query with pagination
-        Page<UserDTO> pageResult = query.executeQuery(entityManager, User.class, UserDTO.class, pageRequest);
+        Page<UserDto> pageResult = query.executeQuery(entityManager, User.class, UserDto.class, pageRequest);
 
         // Assert page metadata
         assertThat(pageResult).isNotNull();
@@ -315,17 +350,17 @@ class QueryIntegrationTest {
         assertThat(pageResult.getSize()).isEqualTo(1); // Page size
 
         // Assert the content on the first page (descending order by name)
-        List<UserDTO> content = pageResult.getContent();
+        List<UserDto> content = pageResult.getContent();
         assertThat(content).hasSize(1);
-        assertThat(content).extracting(UserDTO::getName)
+        assertThat(content).extracting(UserDto::getName)
                 .containsExactly("Charlie");
 
         // Execute for the second page
-        Page<UserDTO> secondPageResult = query.executeQuery(entityManager, User.class, UserDTO.class, pageRequest.next());
-        List<UserDTO> secondContent = secondPageResult.getContent();
+        Page<UserDto> secondPageResult = query.executeQuery(entityManager, User.class, UserDto.class, pageRequest.next());
+        List<UserDto> secondContent = secondPageResult.getContent();
 
         assertThat(secondContent).hasSize(1);
-        assertThat(secondContent).extracting(UserDTO::getName)
+        assertThat(secondContent).extracting(UserDto::getName)
                 .containsExactly("Bob");
     }
 }

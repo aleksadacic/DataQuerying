@@ -100,23 +100,19 @@ public class SpecificationEngine {
 
     // Utility method to apply the selected fields to the CriteriaQuery
     public static <T, R> void applySelection(Root<T> root, CriteriaQuery<Tuple> query, CriteriaBuilder criteriaBuilder, Class<R> dtoClass) {
-        // Get the list of fields based on the DTO's getters
-        List<String> selectedFields = ReflectionUtils.getAttributeNamesFromGetters(dtoClass);
+        List<String> selectedFields = ReflectionUtils.getAttributeNames(dtoClass);
 
-        if (!selectedFields.isEmpty()) {
-            // Create selections for the selected fields from the root entity
-            List<? extends Selection<?>> selections = selectedFields.stream()
-                    .map(field -> {
-                        Selection<?> selection = root.get(field);
-                        selection.alias(field);
-                        return selection;
-                    })
-                    .toList();
+        // Create selections for the selected fields from the root entity
+        List<? extends Selection<?>> selections = selectedFields.stream()
+                .map(field -> {
+                    Selection<?> selection = root.get(field);
+                    selection.alias(field);
+                    return selection;
+                })
+                .toList();
 
-            // Create a compound selection based on the ordered selections
-            CompoundSelection<Tuple> compoundSelection = criteriaBuilder.tuple(selections.toArray(new Selection[0]));
-            query.select(compoundSelection);
-        }
+        // Create a compound selection based on the ordered selections
+        CompoundSelection<Tuple> compoundSelection = criteriaBuilder.tuple(selections.toArray(new Selection[0]));
+        query.select(compoundSelection);
     }
-
 }
