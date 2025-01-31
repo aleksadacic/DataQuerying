@@ -31,7 +31,8 @@ and `SearchOperator`.
 - **Nested Filters**: Build recursive AND/OR conditions.
 - **Multiple Joins**: Deep join. Filter by your joined attribute (e.g. user.card.bank.bankName).
 - **Minimal Boilerplate**: No need to hand-write every `Specification` --the library does it for you.
-- **Projections** simplified. No need to write `@Query` in your repository, just provide a POJO.
+- **Projections** simplified. Just provide a POJO or an interface with getters in the `executeQuery` method for valid
+  mapping.
 - **Integration with Spring Data**: Seamlessly use `Specification`, `Pageable`, etc.
 
 ## Compatibility

@@ -165,22 +165,22 @@ public interface Query<T> {
      *
      * @param entityManager The {@link EntityManager} to execute the query.
      * @param entityClass   The type of the entity being queried.
-     * @param pojo          The class of the POJO to map the results to.
+     * @param returnType    The class (or interface with getters) of the POJO to map the results to.
      * @param <R>           The type of the result (POJO).
      * @return A list of results mapped to the specified DTO class.
      */
-    <R> List<R> executeQuery(EntityManager entityManager, Class<T> entityClass, Class<R> pojo);
+    <R> List<R> executeQuery(EntityManager entityManager, Class<T> entityClass, Class<R> returnType);
 
     /**
      * Executes the query with all the applied conditions using the given {@link EntityManager} and returns a {@link Page}.
      *
      * @param entityManager The {@link EntityManager} to execute the query.
      * @param entityClass   The type of the entity being queried.
-     * @param pojo          The class of the POJO to map the results to.
+     * @param returnType    The class (or interface with getters) of the POJO to map the results to.
      * @param <R>           The type of the result (POJO).
      * @return A page of results mapped to the specified DTO class.
      */
-    <R> Page<R> executeQuery(EntityManager entityManager, Class<T> entityClass, Class<R> pojo, PageRequest pageRequest);
+    <R> Page<R> executeQuery(EntityManager entityManager, Class<T> entityClass, Class<R> returnType, PageRequest pageRequest);
 
     /**
      * Builds the {@link Specification} for the query, representing all the applied conditions.

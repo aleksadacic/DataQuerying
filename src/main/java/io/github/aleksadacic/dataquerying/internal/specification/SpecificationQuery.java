@@ -144,24 +144,24 @@ public class SpecificationQuery<T> implements Query<T> {
     }
 
     @Override
-    public <R> List<R> executeQuery(EntityManager entityManager, Class<T> entityClass, Class<R> pojo) {
-        Map.Entry<CriteriaQuery<Tuple>, Root<T>> preparedQueryObjects = ExecuteQueryUtils.prepareCriteriaQuery(entityManager, entityClass, pojo, distinct, specification);
+    public <R> List<R> executeQuery(EntityManager entityManager, Class<T> entityClass, Class<R> returnType) {
+        Map.Entry<CriteriaQuery<Tuple>, Root<T>> preparedQueryObjects = ExecuteQueryUtils.prepareCriteriaQuery(entityManager, entityClass, returnType, distinct, specification);
         CriteriaQuery<Tuple> criteriaQuery = preparedQueryObjects.getKey();
 
         // Execute the query
         TypedQuery<Tuple> query = entityManager.createQuery(criteriaQuery);
         List<Tuple> results = query.getResultList();
 
-        List<Map<String, Object>> mappedResults = QueryUtils.mapTuplesToFieldValues(results, pojo);
+        List<Map<String, Object>> mappedResults = QueryUtils.mapTuplesToFieldValues(results, returnType);
 
         // Map the results to DTOs using reflection
         ObjectMapper mapper = new ObjectMapper();
-        return QueryUtils.convertToDtoList(pojo, mappedResults, mapper);
+        return QueryUtils.convertToDtoList(returnType, mappedResults, mapper);
     }
 
     @Override
-    public <R> Page<R> executeQuery(EntityManager entityManager, Class<T> entityClass, Class<R> pojo, PageRequest pageRequest) {
-        Map.Entry<CriteriaQuery<Tuple>, Root<T>> preparedQueryObjects = ExecuteQueryUtils.prepareCriteriaQuery(entityManager, entityClass, pojo, distinct, specification);
+    public <R> Page<R> executeQuery(EntityManager entityManager, Class<T> entityClass, Class<R> returnType, PageRequest pageRequest) {
+        Map.Entry<CriteriaQuery<Tuple>, Root<T>> preparedQueryObjects = ExecuteQueryUtils.prepareCriteriaQuery(entityManager, entityClass, returnType, distinct, specification);
         CriteriaQuery<Tuple> criteriaQuery = preparedQueryObjects.getKey();
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         Root<T> root = preparedQueryObjects.getValue();
@@ -189,11 +189,11 @@ public class SpecificationQuery<T> implements Query<T> {
         Long totalElements = entityManager.createQuery(countQuery).getSingleResult();
 
         // Map the tuples to a list of maps with field values
-        List<Map<String, Object>> mappedResults = QueryUtils.mapTuplesToFieldValues(results, pojo);
+        List<Map<String, Object>> mappedResults = QueryUtils.mapTuplesToFieldValues(results, returnType);
 
         // Map the results to DTOs using reflection
         ObjectMapper mapper = new ObjectMapper();
-        List<R> content = QueryUtils.convertToDtoList(pojo, mappedResults, mapper);
+        List<R> content = QueryUtils.convertToDtoList(returnType, mappedResults, mapper);
 
         // Return a Page containing the content and pagination metadata
         return new PageImpl<>(content, pageRequest, totalElements);
