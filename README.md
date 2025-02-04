@@ -1,4 +1,4 @@
-![Data Querying](https://github.com/aleksadacic/DataQuerying/blob/master/cover-image.png?raw=true)
+![Data Querying](https://github.com/aleksadacic/DataQuerying/blob/master/.github/cover-image.png?raw=true)
 
 # Data Querying
 
