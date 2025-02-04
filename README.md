@@ -2,7 +2,7 @@
 
 # Data Querying
 
-**Spring Data Querying** is a lightweight and intuitive library designed to make dynamic query building in Spring Data
+**Data Querying** is a lightweight and intuitive library designed to make dynamic query building in Spring Data
 JPA
 effortless.
 
