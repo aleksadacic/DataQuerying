@@ -1,14 +1,63 @@
+![Data Querying](https://github.com/aleksadacic/DataQuerying/blob/master/cover-image.png?raw=true)
+
 # Data Querying
 
-A *lightweight library*
-for building dynamic, type-safe queries in Spring Data JPA.  
-This library provides a convenient DSL to construct JPA queries at runtime using objects like `Query`, `SearchRequest`,
-and `SearchOperator`.
+**Spring Data Querying** is a lightweight and intuitive library designed to make dynamic query building in Spring Data
+JPA
+effortless.
+
+Instead of manually crafting complex queries, this library provides a clean and type-safe DSL to construct JPA queries
+at runtime. With objects like Query and SearchRequest, you can filter, sort, and paginate data dynamically, all while
+keeping your code readable and maintainable.
+
+<details>
+<summary>❌ Traditional JPA Criteria API (Verbose & Complex)</summary>
+
+```java
+public class UserSpecification {
+
+    public static Specification<User> hasName(String name) {
+        return (Root<User> root, CriteriaQuery<?> query, CriteriaBuilder cb) ->
+                cb.equal(root.get("name"), name);
+    }
+
+    public static Specification<User> hasAgeGreaterThan(int age) {
+        return (Root<User> root, CriteriaQuery<?> query, CriteriaBuilder cb) ->
+                cb.greaterThan(root.get("age"), age);
+    }
+}
+```
+
+And then:
+
+```java
+    Specification<User> spec = Specification
+        .where(UserSpecification.hasName("John"))
+        .and(UserSpecification.hasAgeGreaterThan(25));
+
+List<User> users = userRepository.findAll(spec);
+```
+
+*Imagine doing that for every custom search!*
+
+</details>
+
+<details>
+<summary>✅ Using a DSL (Simplified & Readable)</summary>
+
+```java
+Query<User> query = Query
+        .where("name", FilterOperation.EQUALS, "John")
+        .and("age", FilterOperation.GREATER_THAN, 25);
+
+List<User> users = userRepository.findAll(query.buildSpecification());
+```
+
+</details>
 
 ## Table of Contents
 
 - [Features](#features)
-- [Compatibility](#compatibility)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Core Concepts](#core-concepts)
