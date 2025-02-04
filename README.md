@@ -47,8 +47,8 @@ List<User> users = userRepository.findAll(spec);
 
 ```java
 Query<User> query = Query
-        .where("name", FilterOperation.EQUALS, "John")
-        .and("age", FilterOperation.GREATER_THAN, 25);
+        .where("name", SearchOperator.EQ, "John")
+        .and("age", SearchOperator.GT, 25);
 
 List<User> users = userRepository.findAll(query.buildSpecification());
 ```
