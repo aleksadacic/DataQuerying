@@ -2,17 +2,14 @@ package io.github.aleksadacic.dataquerying.internal.specification;
 
 import io.github.aleksadacic.dataquerying.api.exceptions.AttributeNotFoundException;
 import io.github.aleksadacic.dataquerying.api.exceptions.JoinNotFoundException;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Path;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 
 class SpecificationUtils {
     private SpecificationUtils() {
     }
 
     // Utility method to retrieve the correct Path based on attribute
-    public static <T> Path<?> getPath(Root<T> root, String attribute) throws AttributeNotFoundException, JoinNotFoundException {
+    static <T> Path<?> getPath(Root<T> root, String attribute) throws AttributeNotFoundException, JoinNotFoundException {
         if (attribute.contains(".")) {
             String[] parts = attribute.split("\\.");
             Join<?, ?> join = root.getJoins().stream()
@@ -59,5 +56,11 @@ class SpecificationUtils {
 
         if (join == null) throw new JoinNotFoundException(String.join(".", parts));
         return join;
+    }
+
+    // Utility method to check if a predicate is trivial
+    static boolean isNonTrivialPredicate(Predicate predicate, CriteriaBuilder criteriaBuilder) {
+        // `criteriaBuilder.conjunction()` translates to 1=1
+        return predicate == null || !predicate.equals(criteriaBuilder.conjunction());
     }
 }

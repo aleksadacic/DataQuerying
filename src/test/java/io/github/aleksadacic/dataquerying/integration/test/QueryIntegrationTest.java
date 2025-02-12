@@ -1,6 +1,7 @@
 package io.github.aleksadacic.dataquerying.integration.test;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import io.github.aleksadacic.dataquerying.api.Projection;
 import io.github.aleksadacic.dataquerying.api.Query;
 import io.github.aleksadacic.dataquerying.integration.config.TestConfig;
 import io.github.aleksadacic.dataquerying.integration.dto.UserDto;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
@@ -81,11 +83,39 @@ class QueryIntegrationTest {
     }
 
     @Test
-    void testExecuteQuerySimpleWhereCondition() {
+    void testGetFromSpecification() {
+        // Create a specification that filters users with name "Alice"
+        Specification<User> spec = (root, query, cb) -> cb.equal(root.get("name"), "Alice");
+
+        // Create a new Query using the factory method with Specification
+        Query<User> queryFromSpec = Query.get(spec);
+
+        List<User> results = userRepository.findAll(queryFromSpec.buildSpecification());
+
+        assertThat(results).hasSize(1);
+        assertThat(results.getFirst().getName()).isEqualTo("Alice");
+    }
+
+    @Test
+    void testGetFromExistingQuery() {
+        // Create an initial Query filtering for users with email "bob@example.com"
+        Query<User> initialQuery = Query.where("email", "bob@example.com");
+
+        // Create a new Query using the factory method based on an existing query
+        Query<User> queryFromExisting = Query.get(initialQuery);
+
+        List<User> results = userRepository.findAll(queryFromExisting.buildSpecification());
+
+        assertThat(results).hasSize(1);
+        assertThat(results.getFirst().getName()).isEqualTo("Bob");
+    }
+
+    @Test
+    void testProjectionWithSimpleWhereCondition() {
         // Build a query to find users with name 'Alice'
         Query<User> query = Query.where("name", "Alice");
 
-        List<UserDto> results = query.executeQuery(entityManager, User.class, UserDto.class);
+        List<UserDto> results = Projection.create(entityManager, User.class, UserDto.class).findAll(query);
 
         // Assert that only Alice is returned
         assertThat(results).hasSize(1);
@@ -95,10 +125,10 @@ class QueryIntegrationTest {
     }
 
     @Test
-    void testExecuteQueryAndCondition() {
+    void testProjectionAndCondition() {
         Query<User> query = Query.<User>where("email", "bob@example.com").and("name", "Bob");
 
-        List<UserDto> results = query.executeQuery(entityManager, User.class, UserDto.class);
+        List<UserDto> results = Projection.create(entityManager, User.class, UserDto.class).findAll(query);
 
         // Assert that only Bob is returned
         assertThat(results).hasSize(1);
@@ -108,10 +138,10 @@ class QueryIntegrationTest {
     }
 
     @Test
-    void testExecuteQueryOrCondition() {
+    void testProjectionOrCondition() {
         Query<User> query = Query.<User>where("name", "Alice").or("name", "Charlie");
 
-        List<UserDto> results = query.executeQuery(entityManager, User.class, UserDto.class);
+        List<UserDto> results = Projection.create(entityManager, User.class, UserDto.class).findAll(query);
 
         // Assert that Alice and Charlie are returned
         assertThat(results).hasSize(2);
@@ -120,11 +150,11 @@ class QueryIntegrationTest {
     }
 
     @Test
-    void testExecuteQueryJoinCondition() {
+    void testProjectionJoinCondition() {
         Query<User> query = Query.<User>get()
                 .and("role.name", "ADMIN");
 
-        List<UserDto> results = query.executeQuery(entityManager, User.class, UserDto.class);
+        List<UserDto> results = Projection.create(entityManager, User.class, UserDto.class).findAll(query);
 
         // Assert that only Alice is returned
         assertThat(results).hasSize(1);
@@ -133,23 +163,22 @@ class QueryIntegrationTest {
     }
 
     @Test
-    void testExecuteQueryDistinct() {
+    void testProjectionDistinct() {
         // Suppose there are multiple users with the same role
-        // Let's query distinct roles
         Query<User> query = Query.<User>get().distinct().join("role", JoinType.INNER);
 
-        List<UserDto> results = query.executeQuery(entityManager, User.class, UserDto.class);
+        List<UserDto> results = Projection.create(entityManager, User.class, UserDto.class).findAll(query);
         assertThat(results).hasSize(3);
     }
 
     @Test
-    void testExecuteQueryComplexQuery() {
+    void testProjectionComplexQuery() {
         Query<User> query = Query.<User>get()
                 .join("role", JoinType.INNER)
                 .and("role.name", "ADMIN")
                 .and(Query.<User>get().or("name", "Alice").or("name", "Bob"));
 
-        List<UserDto> results = query.executeQuery(entityManager, User.class, UserDto.class);
+        List<UserDto> results = Projection.create(entityManager, User.class, UserDto.class).findAll(query);
 
         // Only Alice should match
         assertThat(results).hasSize(1);
@@ -244,7 +273,7 @@ class QueryIntegrationTest {
     }
 
     @Test
-    void testExecuteQueryWithPaginationAndSorting() {
+    void testProjectionWithPaginationAndSorting() {
         Query<User> query = Query.where("role.name", "USER");
 
         // Create a PageRequest with sorting
@@ -254,7 +283,7 @@ class QueryIntegrationTest {
         ));
 
         // Execute the query with pagination
-        Page<UserDto> pageResult = query.executeQuery(entityManager, User.class, UserDto.class, pageRequest);
+        Page<UserDto> pageResult = Projection.create(entityManager, User.class, UserDto.class).findAll(query, pageRequest);
 
         // Assert page metadata
         assertThat(pageResult).isNotNull();
@@ -273,14 +302,14 @@ class QueryIntegrationTest {
     }
 
     @Test
-    void testExecuteQueryWithMultiplePages() {
+    void testProjectionWithMultiplePages() {
         Query<User> query = Query.where("role.name", "USER");
 
         // Create a PageRequest for the second page
         PageRequest pageRequest = PageRequest.of(1, 1, Sort.by(Sort.Order.asc("name")));
 
         // Execute the query with pagination
-        Page<UserDto> pageResult = query.executeQuery(entityManager, User.class, UserDto.class, pageRequest);
+        Page<UserDto> pageResult = Projection.create(entityManager, User.class, UserDto.class).findAll(query, pageRequest);
 
         // Assert page metadata
         assertThat(pageResult).isNotNull();
@@ -297,11 +326,11 @@ class QueryIntegrationTest {
     }
 
     @Test
-    void testExecuteQueryWithMultipleConditions() {
+    void testProjectionWithMultipleConditions() {
         Query<User> query = Query.<User>where("name", "Bob").and("superuser", true);
 
         // Execute the query with pagination
-        List<UserDto> result = query.executeQuery(entityManager, User.class, UserDto.class);
+        List<UserDto> result = Projection.create(entityManager, User.class, UserDto.class).findAll(query);
 
         // Assert page metadata
         assertThat(result).isNotNull().hasSize(1);
@@ -310,7 +339,7 @@ class QueryIntegrationTest {
     }
 
     @Test
-    void testExecuteQueryWithMultipleConditions_interfaceDto() {
+    void testProjectionWithMultipleConditions_interfaceDto() {
         @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@class")
         interface X {
             String getName();
@@ -321,7 +350,7 @@ class QueryIntegrationTest {
         Query<User> query = Query.<User>where("name", "Bob").and("superuser", true);
 
         // Execute the query with pagination
-        List<X> result = query.executeQuery(entityManager, User.class, X.class);
+        List<X> result = Projection.create(entityManager, User.class, X.class).findAll(query);
 
         // Assert page metadata
         assertThat(result).isNotNull().hasSize(1);
@@ -330,7 +359,7 @@ class QueryIntegrationTest {
     }
 
     @Test
-    void testExecuteQueryWithComplexConditionsAndPagination() {
+    void testProjectionWithComplexConditionsAndPagination() {
         Query<User> query = Query.<User>get()
                 .join("role", JoinType.INNER)
                 .and("role.name", "USER")
@@ -340,7 +369,7 @@ class QueryIntegrationTest {
         PageRequest pageRequest = PageRequest.of(0, 1, Sort.by(Sort.Order.desc("name")));
 
         // Execute the query with pagination
-        Page<UserDto> pageResult = query.executeQuery(entityManager, User.class, UserDto.class, pageRequest);
+        Page<UserDto> pageResult = Projection.create(entityManager, User.class, UserDto.class).findAll(query, pageRequest);
 
         // Assert page metadata
         assertThat(pageResult).isNotNull();
@@ -356,7 +385,7 @@ class QueryIntegrationTest {
                 .containsExactly("Charlie");
 
         // Execute for the second page
-        Page<UserDto> secondPageResult = query.executeQuery(entityManager, User.class, UserDto.class, pageRequest.next());
+        Page<UserDto> secondPageResult = Projection.create(entityManager, User.class, UserDto.class).findAll(query, pageRequest.next());
         List<UserDto> secondContent = secondPageResult.getContent();
 
         assertThat(secondContent).hasSize(1);

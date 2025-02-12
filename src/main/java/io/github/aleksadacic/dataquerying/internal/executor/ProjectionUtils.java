@@ -1,4 +1,4 @@
-package io.github.aleksadacic.dataquerying.internal.specification;
+package io.github.aleksadacic.dataquerying.internal.executor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.aleksadacic.dataquerying.internal.utils.ReflectionUtils;
@@ -9,8 +9,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-class QueryUtils {
-    private QueryUtils() {
+class ProjectionUtils {
+    private ProjectionUtils() {
     }
 
     public static <R> List<R> convertToDtoList(Class<R> dtoClass, List<Map<String, Object>> mappedResults, ObjectMapper mapper) {

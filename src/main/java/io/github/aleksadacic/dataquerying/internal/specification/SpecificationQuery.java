@@ -1,21 +1,20 @@
 package io.github.aleksadacic.dataquerying.internal.specification;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.aleksadacic.dataquerying.api.Query;
 import io.github.aleksadacic.dataquerying.api.SearchOperator;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Tuple;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.*;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
+/**
+ * Default implementation of the {@link Query} interface using a {@link Specification}-based approach.
+ *
+ * @param <T> the type of the entity being queried.
+ */
 public class SpecificationQuery<T> implements Query<T> {
     private Specification<T> specification;
     private boolean distinct = false;
@@ -28,18 +27,22 @@ public class SpecificationQuery<T> implements Query<T> {
         return new SpecificationQuery<>();
     }
 
-    public static <T> Query<T> where(Query<T> query) {
+    public static <T> Query<T> get(Specification<T> specification) {
+        SpecificationQuery<T> instance = new SpecificationQuery<>();
+        instance.specification = Specification.where(specification);
+        return instance;
+    }
+
+    public static <T> Query<T> get(Query<T> query) {
         SpecificationQuery<T> instance = new SpecificationQuery<>();
         instance.specification = Specification.where(query.buildSpecification());
         return instance;
     }
 
-    // Adds a simple where condition with default equality operator
     public static <T> SpecificationQuery<T> where(String attribute, Object value) {
         return SpecificationQuery.where(attribute, SearchOperator.EQ, value);
     }
 
-    // Adds a condition with a specified operator
     public static <T> SpecificationQuery<T> where(String attribute, SearchOperator operator, Object value) {
         SpecificationQuery<T> instance = new SpecificationQuery<>();
         instance.specification = new SpecificationWrapper<>(new Filter(attribute, operator, value));
@@ -109,14 +112,12 @@ public class SpecificationQuery<T> implements Query<T> {
     }
 
     @Override
-
     public SpecificationQuery<T> distinct() {
         this.distinct = true;
         return this;
     }
 
     @Override
-
     public Specification<T> buildSpecification() {
         return (root, query, criteriaBuilder) -> {
             if (query == null) return null;
@@ -130,7 +131,7 @@ public class SpecificationQuery<T> implements Query<T> {
             // Collect predicates from the specification
             if (specification != null) {
                 Predicate predicate = specification.toPredicate(root, query, criteriaBuilder);
-                if (predicate != null && isNonTrivialPredicate(predicate, criteriaBuilder)) {
+                if (predicate != null && SpecificationUtils.isNonTrivialPredicate(predicate, criteriaBuilder)) {
                     predicates.add(predicate);
                 }
             }
@@ -141,67 +142,5 @@ public class SpecificationQuery<T> implements Query<T> {
 
             return query.getRestriction();
         };
-    }
-
-    @Override
-    public <R> List<R> executeQuery(EntityManager entityManager, Class<T> entityClass, Class<R> returnType) {
-        Map.Entry<CriteriaQuery<Tuple>, Root<T>> preparedQueryObjects = ExecuteQueryUtils.prepareCriteriaQuery(entityManager, entityClass, returnType, distinct, specification);
-        CriteriaQuery<Tuple> criteriaQuery = preparedQueryObjects.getKey();
-
-        // Execute the query
-        TypedQuery<Tuple> query = entityManager.createQuery(criteriaQuery);
-        List<Tuple> results = query.getResultList();
-
-        List<Map<String, Object>> mappedResults = QueryUtils.mapTuplesToFieldValues(results, returnType);
-
-        // Map the results to DTOs using reflection
-        ObjectMapper mapper = new ObjectMapper();
-        return QueryUtils.convertToDtoList(returnType, mappedResults, mapper);
-    }
-
-    @Override
-    public <R> Page<R> executeQuery(EntityManager entityManager, Class<T> entityClass, Class<R> returnType, PageRequest pageRequest) {
-        Map.Entry<CriteriaQuery<Tuple>, Root<T>> preparedQueryObjects = ExecuteQueryUtils.prepareCriteriaQuery(entityManager, entityClass, returnType, distinct, specification);
-        CriteriaQuery<Tuple> criteriaQuery = preparedQueryObjects.getKey();
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        Root<T> root = preparedQueryObjects.getValue();
-
-        // Apply sorting with support for joined paths
-        ExecuteQueryUtils.applySorting(pageRequest, root, criteriaBuilder, criteriaQuery);
-
-        // Execute the query with pagination
-        TypedQuery<Tuple> query = entityManager.createQuery(criteriaQuery);
-        query.setFirstResult((int) pageRequest.getOffset());
-        query.setMaxResults(pageRequest.getPageSize());
-
-        List<Tuple> results = query.getResultList();
-
-        // Count total elements for pagination metadata
-        CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
-        Root<T> countRoot = countQuery.from(entityClass);
-        if (specification != null) {
-            Predicate predicate = specification.toPredicate(countRoot, countQuery, criteriaBuilder);
-            if (predicate != null) {
-                countQuery.where(predicate);
-            }
-        }
-        countQuery.select(criteriaBuilder.count(countRoot));
-        Long totalElements = entityManager.createQuery(countQuery).getSingleResult();
-
-        // Map the tuples to a list of maps with field values
-        List<Map<String, Object>> mappedResults = QueryUtils.mapTuplesToFieldValues(results, returnType);
-
-        // Map the results to DTOs using reflection
-        ObjectMapper mapper = new ObjectMapper();
-        List<R> content = QueryUtils.convertToDtoList(returnType, mappedResults, mapper);
-
-        // Return a Page containing the content and pagination metadata
-        return new PageImpl<>(content, pageRequest, totalElements);
-    }
-
-    // Utility method to check if a predicate is trivial
-    private boolean isNonTrivialPredicate(Predicate predicate, CriteriaBuilder criteriaBuilder) {
-        // `criteriaBuilder.conjunction()` translates to 1=1
-        return predicate == null || !predicate.equals(criteriaBuilder.conjunction());
     }
 }

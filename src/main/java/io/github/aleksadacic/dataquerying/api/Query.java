@@ -1,13 +1,8 @@
 package io.github.aleksadacic.dataquerying.api;
 
 import io.github.aleksadacic.dataquerying.internal.specification.SpecificationQuery;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.JoinType;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
-
-import java.util.List;
 
 /**
  * Query interface for building <code>org.springframework.data.jpa.domain.Specification</code> objects
@@ -16,18 +11,39 @@ import java.util.List;
  * <br>
  * This interface is also available as a <b>Spring Bean</b> with a default implementation,
  * so you can use dependency injection to get the instance.
+ * <p>Example usage:
+ * <pre>
+ * Query&lt;User&gt; query = SpecificationQuery.where("username", "john_doe")
+ *     .and("age", SearchOperator.GT, 18)
+ *     .join("profile.address", JoinType.LEFT)
+ *     .distinct();
+ *
+ * Specification&lt;User&gt; spec = query.buildSpecification();
+ * </pre>
+ * </p>
  *
  * @param <T> The type of the entity being queried.
  */
 public interface Query<T> {
     /**
-     * Creates a new instance of a default {@link Query} implementation without any filters.
+     * Creates a new instance with no initial conditions.
      *
-     * @param <T> The type of the entity being queried.
-     * @return A new instance of {@link Query}.
+     * @param <T> the type of the entity being queried.
+     * @return a new {@link Query} instance with an empty specification.
      */
     static <T> Query<T> get() {
         return SpecificationQuery.get();
+    }
+
+    /**
+     * Creates a new instance with the provided {@link Specification}.
+     *
+     * @param specification the initial specification to apply to the query; may be {@code null}
+     * @param <T>           the type of the entity being queried.
+     * @return a new {@link Query} instance with the specified initial condition.
+     */
+    static <T> Query<T> get(Specification<T> specification) {
+        return SpecificationQuery.get(specification);
     }
 
     /**
@@ -37,8 +53,8 @@ public interface Query<T> {
      * @param <T>   The type of the entity being queried.
      * @return A new instance of {@link Query} with conditions derived from the given query.
      */
-    static <T> Query<T> where(Query<T> query) {
-        return SpecificationQuery.where(query);
+    static <T> Query<T> get(Query<T> query) {
+        return SpecificationQuery.get(query);
     }
 
     /**
@@ -161,32 +177,13 @@ public interface Query<T> {
     Query<T> distinct();
 
     /**
-     * Executes the query with all the applied conditions using the given {@link EntityManager}.
+     * Builds the {@link Specification} that represents all conditions, joins, and distinct settings
+     * applied to this query.
      *
-     * @param entityManager The {@link EntityManager} to execute the query.
-     * @param entityClass   The type of the entity being queried.
-     * @param returnType    The class (or interface with getters) of the POJO to map the results to.
-     * @param <R>           The type of the result (POJO).
-     * @return A list of results mapped to the specified DTO class.
-     */
-    <R> List<R> executeQuery(EntityManager entityManager, Class<T> entityClass, Class<R> returnType);
-
-    /**
-     * Executes the query with all the applied conditions using the given {@link EntityManager} and returns a {@link Page}.
+     * <p>This method collects all predicates from the built-up specification and applies distinct selection,
+     * if specified. The resulting {@link Specification} can then be used to execute a query.</p>
      *
-     * @param entityManager The {@link EntityManager} to execute the query.
-     * @param entityClass   The type of the entity being queried.
-     * @param returnType    The class (or interface with getters) of the POJO to map the results to.
-     * @param <R>           The type of the result (POJO).
-     * @return A page of results mapped to the specified DTO class.
-     */
-    <R> Page<R> executeQuery(EntityManager entityManager, Class<T> entityClass, Class<R> returnType, PageRequest pageRequest);
-
-    /**
-     * Builds the {@link Specification} for the query, representing all the applied conditions.
-     *
-     * @return The {@link Specification} representing the current query conditions.
+     * @return the combined {@link Specification} representing the current query conditions.
      */
     Specification<T> buildSpecification();
-
 }

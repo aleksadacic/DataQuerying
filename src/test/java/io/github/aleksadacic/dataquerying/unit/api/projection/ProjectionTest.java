@@ -1,5 +1,6 @@
-package io.github.aleksadacic.dataquerying.unit.api.query;
+package io.github.aleksadacic.dataquerying.unit.api.projection;
 
+import io.github.aleksadacic.dataquerying.api.Projection;
 import io.github.aleksadacic.dataquerying.api.Query;
 import io.github.aleksadacic.dataquerying.api.SearchOperator;
 import io.github.aleksadacic.dataquerying.utils.Dto;
@@ -27,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
-class ExecuteQueryTest {
+class ProjectionTest {
 
     @Mock
     private EntityManager entityManager;
@@ -76,6 +77,7 @@ class ExecuteQueryTest {
         when(criteriaQuery.from(Dto.class)).thenReturn(root);
 
         // Return the same criteriaQuery in builder chain style
+        when(criteriaBuilder.and(any(Predicate[].class))).thenReturn(mock(Predicate.class));
         when(criteriaQuery.where(any(Predicate.class))).thenReturn(criteriaQuery);
 
         // Use typedQuery for final fetch
@@ -115,12 +117,12 @@ class ExecuteQueryTest {
     }
 
     @Test
-    void testExecuteQuery_ageGreaterThan20() {
+    void testProjection_ageGreaterThan20() {
         // 1) Build the Query
         Query<Dto> query = Query.where("age", SearchOperator.GT, 20);
 
         // 2) Execute
-        List<DtoMinimal> result = query.executeQuery(entityManager, Dto.class, DtoMinimal.class);
+        List<DtoMinimal> result = Projection.create(entityManager, Dto.class, DtoMinimal.class).findAll(query);
 
         // 3) Basic checks
         assertNotNull(result, "Result list should not be null");
@@ -141,7 +143,7 @@ class ExecuteQueryTest {
     }
 
     @Test
-    void testExecuteQueryWithPageRequest_ageGreaterThan20() {
+    void testProjectionWithPageRequest_ageGreaterThan20() {
         // Build the Query with a PageRequest
         Query<Dto> query = Query.where("age", SearchOperator.GT, 20);
         PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "name"));
@@ -152,7 +154,7 @@ class ExecuteQueryTest {
         when(criteriaBuilder.desc(namePath)).thenReturn(order); // Not used in this test
 
         // 4) Execute
-        Page<DtoMinimal> pageResult = query.executeQuery(entityManager, Dto.class, DtoMinimal.class, pageRequest);
+        Page<DtoMinimal> pageResult = Projection.create(entityManager, Dto.class, DtoMinimal.class).findAll(query, pageRequest);
 
         assertNotNull(pageResult, "Page result should not be null");
         assertEquals(1, pageResult.getContent().size(), "Should have exactly one row in content");
@@ -187,12 +189,12 @@ class ExecuteQueryTest {
     }
 
     @Test
-    void testExecuteQuery_ageGreaterThan20AndSuperuserTrue() {
+    void testProjection_ageGreaterThan20AndSuperuserTrue() {
         // 1) Build the Query
         Query<Dto> query = Query.<Dto>where("age", SearchOperator.GT, 20).and("superuser", true);
 
         // 2) Execute
-        List<DtoMinimal> result = query.executeQuery(entityManager, Dto.class, DtoMinimal.class);
+        List<DtoMinimal> result = Projection.create(entityManager, Dto.class, DtoMinimal.class).findAll(query);
 
         // 3) Basic checks
         assertNotNull(result, "Result list should not be null");

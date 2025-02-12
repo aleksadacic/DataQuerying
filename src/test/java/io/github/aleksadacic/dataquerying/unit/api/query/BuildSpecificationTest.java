@@ -2,14 +2,11 @@ package io.github.aleksadacic.dataquerying.unit.api.query;
 
 import io.github.aleksadacic.dataquerying.api.Query;
 import io.github.aleksadacic.dataquerying.api.SearchOperator;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import io.github.aleksadacic.dataquerying.utils.PersonEntity;
+import jakarta.persistence.criteria.*;
 import jakarta.persistence.metamodel.Attribute;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.jpa.domain.Specification;
-import io.github.aleksadacic.dataquerying.utils.PersonEntity;
 
 import java.util.List;
 import java.util.Set;
@@ -29,6 +26,42 @@ class BuildSpecificationTest extends FilterInclusionTest {
         assertNotNull(query);
         Specification<PersonEntity> spec = query.buildSpecification();
         assertNotNull(spec);
+    }
+
+    /**
+     * Tests that SpecificationQuery.get(Specification<T>) creates a Query instance
+     * whose underlying specification is based on the provided specification.
+     */
+    @Test
+    void testGetFromSpecification() {
+        // Create a dummy specification that always returns a conjunction predicate.
+        Specification<PersonEntity> dummySpec = (Root<PersonEntity> root, CriteriaQuery<?> query, CriteriaBuilder cb) ->
+                cb.equal(root.get("name"), "John");
+        Query<PersonEntity> queryFromSpec = Query.get(dummySpec);
+
+        assertNotNull(queryFromSpec, "Query created from specification should not be null");
+
+        Specification<PersonEntity> builtSpec = queryFromSpec.buildSpecification();
+        assertNotNull(builtSpec, "Built specification should not be null");
+    }
+
+    /**
+     * Tests that SpecificationQuery.get(Query<T>) creates a Query instance
+     * whose underlying specification is based on the specification built from the original Query.
+     */
+    @Test
+    void testGetFromQuery() {
+        // Build an original Query using one of the standard factory methods.
+        Query<PersonEntity> originalQuery = Query.where("name", "John");
+        // For example, Query.where(String, Object) uses an EQ operator internally.
+
+        // Now create a new Query by wrapping the original query.
+        Query<PersonEntity> queryFromQuery = Query.get(originalQuery);
+
+        assertNotNull(queryFromQuery, "Query created from another query should not be null");
+
+        Specification<PersonEntity> specFromQuery = queryFromQuery.buildSpecification();
+        assertNotNull(specFromQuery, "Built specification from wrapped query should not be null");
     }
 
     /**
