@@ -2,13 +2,13 @@
 
 # Data Querying
 
-**Data Querying** is a lightweight and intuitive library designed to make dynamic query building in Spring Data
-JPA
-effortless.
+**Data Querying** is a lightweight and intuitive library designed to make **dynamic query building**
+in Spring Data JPA **effortless**.
 
-Instead of manually crafting complex queries, this library provides a clean and type-safe DSL to construct JPA queries
-at runtime. With objects like Query and SearchRequest, you can filter, sort, and paginate data dynamically, all while
-keeping your code readable and maintainable.
+Instead of manually crafting complex queries,
+this library provides a **clean and type-safe DSL** to construct JPA queries at runtime.
+With objects like `Query` and `SearchRequest`, you can **filter, sort, and paginate data dynamically**,
+all while keeping your code **readable and maintainable**.
 
 <details>
 <summary>❌ Traditional JPA Criteria API (Verbose & Complex)</summary>
@@ -58,15 +58,18 @@ List<User> users = userRepository.findAll(query.buildSpecification());
 ## Table of Contents
 
 - [Features](#features)
+- [Compatibility](#compatibility)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Core Concepts](#core-concepts)
     - [SearchOperator](#searchoperator)
     - [Query](#query)
     - [SearchRequest](#searchrequest)
+    - [Projection](#projection)
 - [Usage Examples](#usage-examples)
     - [Building Queries Directly](#building-queries-directly)
     - [Using SearchRequest in APIs](#using-searchrequest-in-apis)
+    - [In combination with Projection](#in-combination-with-projection)
 - [Advanced Usage](#advanced-usage)
 - [Exceptions](#exceptions)
 - [Package Structure](#package-structure)
@@ -75,14 +78,13 @@ List<User> users = userRepository.findAll(query.buildSpecification());
 
 ## Features
 
-- **Dynamic Query Building**: Create complex JPA queries with an intuitive, fluent API.
-- **Search request DTO** for your endpoints out of the box which you can convert to `Specification` object.
-- **Nested Filters**: Build recursive AND/OR conditions.
-- **Multiple Joins**: Deep join. Filter by your joined attribute (e.g. user.card.bank.bankName).
-- **Minimal Boilerplate**: No need to hand-write every `Specification` --the library does it for you.
-- **Projections** simplified. Just provide a POJO or an interface with getters in the `executeQuery` method for valid
-  mapping.
-- **Integration with Spring Data**: Seamlessly use `Specification`, `Pageable`, etc.
+* **Dynamic Query Building**: Create complex JPA queries with an intuitive, fluent API.
+* **Search request DTO** for your endpoints out of the box, which you can convert to a `Specification` object.
+* **Nested Filters**: Build recursive AND/OR conditions.
+* **Multiple Joins**: Deep join support to filter by joined attributes (e.g., `user.card.bank.bankName`).
+* **Minimal Boilerplate**: No need to manually write `Specification` implementations.
+* **Projection Interface Support**: Easily map query results to DTOs or interfaces.
+* **Integration with Spring Data**: Seamlessly use `Specification`, `Pageable`, and `Sort`.
 
 ## Compatibility
 
@@ -93,7 +95,7 @@ This library is compatible with:
 - **Java Version**: 17 - 23
 
 For more compatibility details
-visit [this page](https://github.com/aleksadacic/DataQuerying/blob/master/COMPATIBILITY.md).
+visit [COMPATIBILITY.md](https://github.com/aleksadacic/DataQuerying/blob/master/COMPATIBILITY.md).
 
 ## Installation
 
@@ -105,20 +107,17 @@ visit [this page](https://github.com/aleksadacic/DataQuerying/blob/master/COMPAT
 <dependency>
     <groupId>io.github.aleksadacic.dataquerying</groupId>
     <artifactId>DataQuerying</artifactId>
-    <version>1.0.0</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
 </details>
 
-[//]: # (TODO Replace **YOUR_VERSION** with the actual version once it's published to a Maven repository, e.g., Maven Central, JitPack, or your private repository)
-
 ## Quick Start
 
 1. **Add dependency** to your Spring Boot or Spring application (see [Installation](#installation)).
 2. **Use** `Query` or `SearchRequest` on your repository/service code to build dynamic queries.
-3. **Integrate** the resulting `Specification<T>` or `criteriaCodeExpressions` related to your existing Spring Data JPA
-   setup.
+3. **Integrate** the resulting `Specification<T>` into your existing Spring Data JPA setup.
 
 ## Core Concepts
 
@@ -129,35 +128,16 @@ part of the *public API* and can be referenced directly when building queries.
 
 ```java
 public enum SearchOperator {
-    EQ,
-    NOT_EQ,
-    GTE,
-    LTE,
-    GT,
-    LT,
-    IN,
-    BETWEEN,
-    LIKE,
-    NOT_LIKE
+    EQ, NOT_EQ, GTE, LTE, GT, LT, IN, BETWEEN, LIKE, NOT_LIKE
 }
 ```
 
 ### Query
 
-A fluent builder for creating JPA Specification<T> objects or executing queries directly via JPA’s Criteria API.
-
-Key methods:
-
-- `where(...), and(...), or(...)` – attach conditions to the query.
-- `join(...)` – specify join clauses (including nested joins).
-- `distinct()` – force distinct selection if needed.
-- `buildSpecification()` – produce a Specification<T> for Spring Data JPA usage.
-- `executeQuery(...)` – if you want to manually run a Criteria query with an EntityManager.
-
-Example:
+A fluent builder for creating JPA `Specification<T>` objects.
 
 ```java
-  Query<User> userQuery = Query.get()
+Query<User> userQuery = Query.get()
         .where("email", SearchOperator.EQ, "test@example.com")
         .or("active", SearchOperator.EQ, true);
 
@@ -167,28 +147,60 @@ List<User> results = userRepository.findAll(spec);
 
 ### SearchRequest
 
-A data structure for capturing search criteria in a JSON-friendly format. It contains:
-
-- A list of FilterData (attribute, value, operator, nested filters).
-- An overall logical operator (AND/OR) for the top-level filters.
-- Pagination (PageInfo) and sorting (OrderInfo) metadata.
+A JSON-friendly structure for capturing search criteria, including pagination and sorting.
 
 Typically, you’d receive a `SearchRequest` in a REST controller from the client side. Then you convert it to a `Query<>`
 via `getQuery` and use it in your source code to modify the query you're building.
 
 You can also just get
 a `Specification<>` object easily by calling the
-method `getSpecification` to pass to *repository* methods.
+method `getSpecification` to pass to `JpaSpecificationExecutor` repository interfaces.
+
+Example JSON body:
+
+[//]: # (@formatter:off)
+```json
+{
+  "filters": [
+    {"attribute": "city", "searchOperator": "EQ", "value": "New York"},
+    {"attribute": "active", "searchOperator": "EQ", "value": true}
+  ],
+  "conditionalOperator": "AND",
+  "page": {"pageNumber": 0, "pageSize": 10},
+  "order": [{"attribute": "lastName", "sortOrder": "ASC"}]
+}
+```
+[//]: # (@formatter:on)
+
+### Projection
+
+The `Projection` Interface allows mapping query results directly to DTOs **without additional conversions**.
+
+[//]: # (@formatter:off)
+```java
+// Also can be a POJO class instead of an Interface
+public interface UserMinimalDto {
+    String getFirstName();
+    String getLastName();
+    String getEmail();
+}
+```
+[//]: # (@formatter:on)
+
+Using it in a query:
+
+```java
+Specification<User> specification = Query.where("firstName", "John").buildSpecification();
+List<UserMinimalDto> users = Projection.create(entityManager, User.class, UserMinimalDto.class).findAll(specification);
+```
 
 ## Usage Examples
 
 ### Building Queries Directly
 
-When you need a dynamic query in your service or repository layer:
-
 ```java
-  Query<User> userQuery = Query.get()
-        .where("country", SearchOperator.EQ, "USA")
+Query<User> userQuery = Query
+        .<User>where("country", SearchOperator.EQ, "USA")
         .and("age", SearchOperator.GTE, 18)
         .distinct();
 
@@ -197,39 +209,6 @@ List<User> adultsInUSA = userRepository.findAll(spec);
 ```
 
 ### Using SearchRequest in APIs
-
-Create a `SearchRequest` on the client side (or in your code) that includes filters and pagination:
-
-```json
-{
-  "filters": [
-    {
-      "attribute": "city",
-      "searchOperator": "EQ",
-      "value": "New York"
-    },
-    {
-      "attribute": "active",
-      "searchOperator": "EQ",
-      "value": true
-    }
-  ],
-  "conditionalOperator": "AND",
-  "page": {
-    "pageNumber": 0,
-    "pageSize": 10
-  },
-  "order": [
-    {
-      "attribute": "lastName",
-      "sortOrder": "ASC"
-    }
-  ]
-}
-
-```
-
-Receive it in your Spring REST Controller:
 
 ```java
 
@@ -247,21 +226,36 @@ public class UserController {
 }
 ```
 
-Execute the query with your repository, taking advantage of the PageRequest or Sort from the SearchRequest.
+### In combination with Projection
+
+```java
+
+@RestController
+@RequestMapping("/users")
+public class UserController {
+    @Autowired
+    private EntityManager entityManager;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @PostMapping("/search")
+    public List<UserMinimalDto> getAllMinimal() {
+        return Projection.create(entityManager, User.class, UserMinimalDto.class).findAll();
+    }
+}
+```
 
 ## Advanced Usage
 
-### Dynamically Enhancing a SearchRequest Before Execution
+<details>
+<summary>Dynamically Enhancing a <b>SearchRequest</b> Before Execution</summary>
 
-One of the powerful features of this library is the ability to dynamically modify a SearchRequest at runtime before
+One of the powerful features of this library is the ability to dynamically modify a `SearchRequest` at runtime before
 executing it. This is particularly useful when you need to apply additional filters or conditions based on business
 logic, user roles, or other dynamic factors.
 
 Example: Enhancing a SearchRequest in a Controller
-
-Imagine you receive a `SearchRequest` from the client but want to programmatically add conditions such as ensuring the
-user can only query their own organization, or adding global filters like "only active records." Here's how you can
-enhance the request and execute the query:
 
 ```java
 
@@ -273,48 +267,53 @@ public class UserController {
 
     @PostMapping("/search")
     public List<User> enhancedSearch(@RequestBody SearchRequest request) {
-        // Step 1: Convert SearchRequest to Query
         Query<User> query = request.getQuery();
 
-        // Step 2: Add additional conditions programmatically
         query.and("status", SearchOperator.EQ, "ACTIVE"); // Global filter
-        query.and("organizationId", SearchOperator.EQ, getCurrentUserOrganizationId()); // User-specific filter
+        query.and("organizationId", SearchOperator.EQ, 123); // User-specific filter
 
-        // Step 3: Build Specification and execute query
-        Specification<User> spec = query.buildSpecification();
-        return userRepository.findAll(spec, request.getPageRequest());
-    }
-
-    private Long getCurrentUserOrganizationId() {
-        // Simulate fetching current user's organization ID
-        return 123L;
+        return userRepository.findAll(query.buildSpecification(), request.getPageRequest());
     }
 }
 ```
 
-### Executing query with projection and pagination
+</details>
 
-This approach also supports complex query scenarios, such as adding join conditions dynamically. Then, you can retrieve
-a list of projections as `List<Dto>` to return as a response:
+<details>
+<summary>Multiple and nested joins</summary>
 
 ```java
+Query<User> query = Query.<User>where("department.manager.name", "John")
+        .and("role.permission.name", "can_view_departments")
+        .and(Query
+                .<User>where("salary.card.bank.name", "Gotham Bank")
+                .or("salary.card.bank.location", "Gotham")
+                .join("salary.card.bank", JoinType.LEFT))
+        .join("department.manager", JoinType.INNER)
+        .join("role.permission", JoinType.INNER);
 
-@PostMapping("/searchWithJoins")
-public Page<UserDTO> searchWithJoins(@RequestBody SearchRequest request) {
-    // Convert SearchRequest to Query
-    Query<User> query = request.getQuery();
-
-    // Add a join condition dynamically
-    query = query.join("role", JoinType.INNER).and("role.name", SearchOperator.EQ, "ADMIN");
-
-    return query.executeQuery(entityManager, User.class, UserDTO.class, request.getPageRequest());
-}
-
+List<User> users = repository.findAll(query.buildSpecification());
 ```
+
+If you omitted the `join` method,
+then all the necessary tables will be joined through the given **attribute path**,
+e.g. `department.manager.name` with default join type as `JoinType.LEFT_JOIN`.
+
+```java
+Query<User> query = Query.<User>where("department.manager.name", "John")
+        .and("role.permission.name", "can_view_departments")
+        .and(Query
+                .<User>where("salary.card.bank.name", "Gotham Bank")
+                .or("salary.card.bank.location", "Gotham"));
+
+List<User> users = repository.findAll(query.buildSpecification());
+```
+
+</details>
 
 > [!NOTE]
 > Classes under `internal` package should only be used if you know and understand the
-> internals. The library’s main public classes are `Query`, `SearchRequest`, and `SearchOperator`.
+> internals. The library’s main public classes are `Query`, `SearchRequest`, `SearchOperator`, and `Projection`.
 
 ## Exceptions
 
@@ -338,34 +337,29 @@ errors in your REST APIs.
   conflicting operators, logical errors in
   filter groupings, or issues that prevent the library from creating a valid JPA criteria.
 
-> [!NOTE]
-> In most cases, these exceptions indicate an issue with how your filters or joins are configured. Proper validation of
-> incoming request data (e.g., attribute names, operator types) can help avoid them.
-
 ## Package Structure
 
 ```
   io.github.aleksadacic.dataquerying
   ├── api
     ├── exceptions
-  │ ├── Query.java // Public: dynamic query builder
-  │ ├── SearchRequest.java // Public: JSON-friendly request object
-  │ └── SearchOperator.java // Public: enumeration of operators (EQ, NOT_EQ, etc.)
+  │ ├── Query.java
+  │ ├── SearchRequest.java
+  │ ├── SearchOperator.java
+  │ └── Projection.java
   └── internal
+    ├── deserializers
     ├── enums
-    ├── query
+    ├── executor
     ├── search
+    ├── specification
     └── utils
 ```
-
-- Internal packages contain supporting classes (e.g., `SpecificationQuery`, `SpecificationEngine`) not intended for
-  direct use.
-- Only api classes are part of the stable, public-facing API.
 
 ## Contributing
 
 Contributions are encouraged and accepted. To view more information about contribution
-visit [this page](https://github.com/aleksadacic/DataQuerying/blob/master/CONTRIBUTING.md).
+visit [CONTRIBUTING.md](https://github.com/aleksadacic/DataQuerying/blob/master/CONTRIBUTING.md).
 
 ## License
 
