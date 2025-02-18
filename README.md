@@ -105,7 +105,7 @@ visit [COMPATIBILITY.md](https://github.com/aleksadacic/DataQuerying/blob/master
 ```xml
 
 <dependency>
-    <groupId>io.github.aleksadacic.dataquerying</groupId>
+    <groupId>dev.rosemarylab.dataquerying</groupId>
     <artifactId>DataQuerying</artifactId>
     <version>2.0.0</version>
 </dependency>
@@ -190,8 +190,11 @@ public interface UserMinimalDto {
 Using it in a query:
 
 ```java
+@Autowired
+ProjectionFactory projectionFactory;
+
 Specification<User> specification = Query.where("firstName", "John").buildSpecification();
-List<UserMinimalDto> users = Projection.create(entityManager, User.class, UserMinimalDto.class).findAll(specification);
+List<UserMinimalDto> users = projectionFactory.create(User.class, UserMinimalDto.class).findAll(specification);
 ```
 
 ## Usage Examples
@@ -234,14 +237,14 @@ public class UserController {
 @RequestMapping("/users")
 public class UserController {
     @Autowired
-    private EntityManager entityManager;
+    private ProjectionFactory projectionFactory;
 
     @Autowired
     private UserRepository userRepository;
 
     @PostMapping("/search")
     public List<UserMinimalDto> getAllMinimal() {
-        return Projection.create(entityManager, User.class, UserMinimalDto.class).findAll();
+        return projectionFactory.create(User.class, UserMinimalDto.class).findAll();
     }
 }
 ```
@@ -313,7 +316,7 @@ List<User> users = repository.findAll(query.buildSpecification());
 
 > [!NOTE]
 > Classes under `internal` package should only be used if you know and understand the
-> internals. The library’s main public classes are `Query`, `SearchRequest`, `SearchOperator`, and `Projection`.
+> internals. The library’s main public classes are `Query`, `SearchRequest`, `SearchOperator`, `ProjectionFactory`, and `Projection`.
 
 ## Exceptions
 
@@ -340,13 +343,14 @@ errors in your REST APIs.
 ## Package Structure
 
 ```
-  io.github.aleksadacic.dataquerying
+  dev.rosemarylab.dataquerying
   ├── api
     ├── exceptions
+  │ ├── Projection.java
+  │ ├── ProjectionFactory.java
   │ ├── Query.java
-  │ ├── SearchRequest.java
   │ ├── SearchOperator.java
-  │ └── Projection.java
+  │ └── SearchRequest.java
   └── internal
     ├── deserializers
     ├── enums

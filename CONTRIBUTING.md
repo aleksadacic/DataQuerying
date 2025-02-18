@@ -22,7 +22,7 @@ All types of contributions are encouraged and valued. See the [Table of Contents
 ## Code of Conduct
 This project is governed by the [DataQuerying Code of Conduct](https://github.com/aleksadacic/DataQuerying/blob/master/CODE_OF_CONDUCT.md).
 By participating you are expected to uphold this code.
-Please report unacceptable behavior to aleksa.dacic99@gmail.com.
+Please report unacceptable behavior to labrosemary@gmail.com.
 
 ## I Want To Contribute
 
@@ -52,7 +52,7 @@ A good bug report shouldn't leave others needing to chase you up for more inform
 
 #### How Do I Submit a Good Bug Report?
 
-> You must never report security related issues, vulnerabilities or bugs including sensitive information to the issue tracker, or elsewhere in public. Instead, sensitive bugs must be sent by email to <aleksa.dacic99@gmail.com>.
+> You must never report security related issues, vulnerabilities or bugs including sensitive information to the issue tracker, or elsewhere in public. Instead, sensitive bugs must be sent by email to <labrosemary@gmail.com>.
 
 We use GitHub issues to track bugs and errors. If you run into an issue with the project:
 

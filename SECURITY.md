@@ -15,7 +15,7 @@ If you discover a security vulnerability, please follow these steps:
    - Avoid publicly disclosing the vulnerability (e.g., opening an issue or PR) to prevent potential exploitation.
 
 2. **Contact Us Securely**:
-   - Email **[aleksa.dacic99@gmail.com](mailto:aleksa.dacic99@gmail.com)** with the following information:
+   - Email **[labrosemary@gmail.com](mailto:labrosemary@gmail.com)** with the following information:
      - A detailed description of the vulnerability.
      - Steps to reproduce the issue.
      - The potential impact of the vulnerability.
@@ -46,4 +46,4 @@ We follow a **coordinated disclosure policy**:
 
 ## Questions or Concerns?
 
-If you have any other security-related questions, feel free to reach out to us at **[aleksa.dacic99@gmail.com](mailto:aleksa.dacic99@gmail.com)**.
+If you have any other security-related questions, feel free to reach out to us at **[labrosemary@gmail.com](mailto:labrosemary@gmail.com)**.
