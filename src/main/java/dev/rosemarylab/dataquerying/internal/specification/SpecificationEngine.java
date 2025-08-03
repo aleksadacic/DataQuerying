@@ -114,12 +114,24 @@ public class SpecificationEngine {
         query.select(compoundSelection);
     }
 
+//    TODO distinct on
+    //select distinct on (l1_0.id) l1_0.first_name, l1_0.last_name, li2_0.url, po1_0.description, l1_0.id
+    //from listing l1_0
+    //         join user_listing_interaction uli1_0 on l1_0.id = uli1_0.listing_id
+    //         join listing_image li2_0 on l1_0.id = li2_0.listing_id
+    //         join listing_pick_one lpo2_0 on l1_0.id = lpo2_0.listing_id
+    //         join pick_one po1_0 on po1_0.id = lpo2_0.pick_one_id
+    //where uli1_0.user_id=2
+    //  and uli1_0.interaction=1
+    //  and l1_0.status=0
+    //offset ? rows fetch first ? rows only
+
     private static <T> Selection<?> getSelectionField(Root<T> root, String field, Joined joined) {
         if (joined != null) {
             From<?, ?> joinPath = root;
             String[] joinPathParts = joined.joinPath().split("\\.");
             for (int i = 0; i < joinPathParts.length - 1; i++) {
-                joinPath = joinPath.join(joinPathParts[i], JoinType.LEFT);
+                joinPath = joinPath.join(joinPathParts[i], JoinType.INNER);
             }
             Selection<?> selection = joinPath.get(joinPathParts[joinPathParts.length - 1]);
             return selection.alias(field);
