@@ -1,5 +1,6 @@
 package dev.rosemarylab.dataquerying.internal.specification;
 
+import dev.rosemarylab.dataquerying.api.Joined;
 import dev.rosemarylab.dataquerying.api.exceptions.SpecificationBuilderException;
 import dev.rosemarylab.dataquerying.internal.utils.ReflectionUtils;
 import jakarta.persistence.Tuple;
@@ -7,6 +8,7 @@ import jakarta.persistence.criteria.*;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class SpecificationEngine {
 
@@ -100,19 +102,30 @@ public class SpecificationEngine {
 
     // Utility method to apply the selected fields to the CriteriaQuery
     public static <T, R> void applySelection(Root<T> root, CriteriaQuery<Tuple> query, CriteriaBuilder criteriaBuilder, Class<R> dtoClass) {
-        List<String> selectedFields = ReflectionUtils.getAttributeNames(dtoClass);
+        Map<String, Joined> fields = ReflectionUtils.getAttributeNamesWithJoinedProperties(dtoClass);
 
         // Create selections for the selected fields from the root entity
-        List<? extends Selection<?>> selections = selectedFields.stream()
-                .map(field -> {
-                    Selection<?> selection = root.get(field);
-                    selection.alias(field);
-                    return selection;
-                })
+        List<? extends Selection<?>> selections = fields.entrySet().stream()
+                .map(entry -> getSelectionField(root, entry.getKey(), entry.getValue()))
                 .toList();
 
         // Create a compound selection based on the ordered selections
         CompoundSelection<Tuple> compoundSelection = criteriaBuilder.tuple(selections.toArray(new Selection[0]));
         query.select(compoundSelection);
+    }
+
+    private static <T> Selection<?> getSelectionField(Root<T> root, String field, Joined joined) {
+        if (joined != null) {
+            From<?, ?> joinPath = root;
+            String[] joinPathParts = joined.joinPath().split("\\.");
+            for (int i = 0; i < joinPathParts.length - 1; i++) {
+                joinPath = joinPath.join(joinPathParts[i], JoinType.LEFT);
+            }
+            Selection<?> selection = joinPath.get(joinPathParts[joinPathParts.length - 1]);
+            return selection.alias(field);
+        }
+        Selection<?> selection = root.get(field);
+        selection.alias(field);
+        return selection;
     }
 }

@@ -1,5 +1,6 @@
 package dev.rosemarylab.dataquerying.internal.utils;
 
+import dev.rosemarylab.dataquerying.api.Joined;
 import dev.rosemarylab.dataquerying.api.exceptions.SpecificationBuilderException;
 
 import java.lang.reflect.Field;
@@ -7,11 +8,32 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ReflectionUtils {
     private ReflectionUtils() {
+    }
+
+    public static <T> Map<String, Joined> getAttributeNamesWithJoinedProperties(Class<T> targetType) throws SpecificationBuilderException {
+        if (targetType.isInterface()) {
+            if (Arrays.stream(targetType.getDeclaredMethods()).noneMatch(method -> (isNonBooleanGetter(method) || isBooleanGetter(method)))) {
+                throw new SpecificationBuilderException("Target interface doesn't contain any getter.");
+            }
+            Map<String, Joined> attributeNames = new HashMap<>();
+            Arrays.stream(targetType.getDeclaredMethods())
+                    .filter(method -> (isNonBooleanGetter(method) || isBooleanGetter(method)))
+                    .forEach(method -> attributeNames.put(getFieldNameFromGetter(method), method.getDeclaredAnnotation(Joined.class)));
+            return attributeNames;
+        }
+
+        if (targetType.getDeclaredFields().length == 0)
+            throw new SpecificationBuilderException("Target class doesn't contain any attribute.");
+        Map<String, Joined> attributeNames = new HashMap<>();
+        Arrays.stream(targetType.getDeclaredFields())
+                .forEach(field -> attributeNames.put(field.getName(), field.getDeclaredAnnotation(Joined.class)));
+        return attributeNames;
     }
 
     public static <T> List<String> getAttributeNames(Class<T> targetType) throws SpecificationBuilderException {
