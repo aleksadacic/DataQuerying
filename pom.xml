@@ -51,7 +51,7 @@
         <mockito.version>5.23.0</mockito.version>
         <h2.version>2.4.240</h2.version>
         <assertj.version>3.27.7</assertj.version>
-        <hibernate-core.version>6.6.53.Final</hibernate-core.version>
+        <hibernate-core.version>7.4.1.Final</hibernate-core.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
