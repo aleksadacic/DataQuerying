@@ -5,7 +5,7 @@
 
     <groupId>dev.rosemarylab</groupId>
     <artifactId>DataQuerying</artifactId>
-    <version>2.0.1</version>
+    <version>3.0.0</version>
     <packaging>jar</packaging>
 
     <name>DataQuerying</name>
@@ -39,19 +39,19 @@
     </scm>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <maven.version>3.9.0</maven.version>
-        <spring-data-jpa.version>3.4.13</spring-data-jpa.version>
-        <spring-framework.version>6.2.19</spring-framework.version>
+        <spring-data-jpa.version>4.0.6</spring-data-jpa.version>
+        <spring-framework.version>7.0.8</spring-framework.version>
         <spring-test.version>${spring-framework.version}</spring-test.version>
         <jakarta.persistence.version>3.2.0</jakarta.persistence.version>
         <lombok.version>1.18.46</lombok.version>
-        <jackson-databind.version>2.18.8</jackson-databind.version>
-        <junit-jupiter.version>5.14.4</junit-jupiter.version>
+        <jackson-databind.version>2.22.0</jackson-databind.version>
+        <junit-jupiter.version>6.1.0</junit-jupiter.version>
         <mockito.version>5.23.0</mockito.version>
         <h2.version>2.4.240</h2.version>
         <assertj.version>3.27.7</assertj.version>
-        <hibernate-core.version>6.6.53.Final</hibernate-core.version>
+        <hibernate-core.version>7.0.10.Final</hibernate-core.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
@@ -151,7 +151,7 @@
                                     <version>[${maven.version},)</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
-                                    <version>[21,26)</version>
+                                    <version>[25,26)</version>
                                 </requireJavaVersion>
                             </rules>
                         </configuration>

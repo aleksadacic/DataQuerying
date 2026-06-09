@@ -90,12 +90,23 @@ List<User> users = userRepository.findAll(query.buildSpecification());
 
 This library is compatible with:
 
-- **Spring Framework**: 6.2.19+
-- **Spring Boot**: 3.4.13+
-- **Java Version**: 17 - 25
+- **Spring Framework**: 7.0.8+
+- **Spring Data JPA**: 4.0.6+
+- **Spring Boot**: 4.0.6+
+- **Java Version**: 25
+- **Jakarta Persistence**: 3.2.0+
 
 For more compatibility details
 visit [COMPATIBILITY.md](https://github.com/aleksadacic/DataQuerying/blob/master/COMPATIBILITY.md).
+
+## Upgrade Notes for 3.0.0
+
+Version `3.0.0` upgrades the library to the Spring `7` / Spring Data JPA `4` generation.
+
+- Upgrade your application to **Java 25** before adopting `3.0.0`.
+- Use **Spring Framework 7** and **Spring Boot 4** compatible dependencies.
+- No intentional public API redesign was introduced in Data Querying itself for this release.
+- If you need Spring `6.x` / Boot `3.x` support, stay on the `2.x` release line.
 
 ## Installation
 
@@ -107,7 +118,7 @@ visit [COMPATIBILITY.md](https://github.com/aleksadacic/DataQuerying/blob/master
 <dependency>
     <groupId>dev.rosemarylab.dataquerying</groupId>
     <artifactId>DataQuerying</artifactId>
-    <version>2.0.1</version>
+    <version>3.0.0</version>
 </dependency>
 ```
 
