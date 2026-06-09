@@ -47,7 +47,7 @@
         <jakarta.persistence.version>3.2.0</jakarta.persistence.version>
         <lombok.version>1.18.46</lombok.version>
         <jackson-databind.version>2.18.8</jackson-databind.version>
-        <junit-jupiter.version>5.14.4</junit-jupiter.version>
+        <junit-jupiter.version>6.1.0</junit-jupiter.version>
         <mockito.version>5.23.0</mockito.version>
         <h2.version>2.4.240</h2.version>
         <assertj.version>3.27.7</assertj.version>
