@@ -1,5 +1,13 @@
 # Compatibility Matrix
 
+## Version 2.0.1
+
+| Spring Data JPA | Spring Framework | Spring Boot | Java Version | Jakarta Persistence |
+|-----------------|------------------|-------------|--------------|---------------------|
+| 3.4.13          | 6.2.19+          | 3.4.13+     | 17 - 25      | 3.2.0+              |
+| 3.3.x           | 6.1.x            | 3.3.x       | 17 - 21      | 3.1.0+              |
+| 3.2.x           | 6.0.x            | 3.2.x       | 17 - 21      | 3.0.0+              |
+
 ## Version 2.0.0
 
 | Spring Data JPA | Spring Framework | Spring Boot | Java Version | Jakarta Persistence |
