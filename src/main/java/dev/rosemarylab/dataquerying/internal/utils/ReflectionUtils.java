@@ -64,8 +64,23 @@ public class ReflectionUtils {
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) {
+            if (method.getDeclaringClass() == Object.class) {
+                return handleObjectMethod(proxy, method, args);
+            }
+            if (!isNonBooleanGetter(method) && !isBooleanGetter(method)) {
+                throw new SpecificationBuilderException("Only getter methods can be used on interface projections.");
+            }
             String fieldName = getFieldNameFromMethod(method);
             return data.get(fieldName);
+        }
+
+        private Object handleObjectMethod(Object proxy, Method method, Object[] args) {
+            return switch (method.getName()) {
+                case "toString" -> "ProjectionProxy" + data;
+                case "hashCode" -> data.hashCode();
+                case "equals" -> proxy == (args == null || args.length == 0 ? null : args[0]);
+                default -> throw new SpecificationBuilderException("Unsupported proxy method: " + method.getName());
+            };
         }
 
         private String getFieldNameFromMethod(Method method) {
@@ -73,7 +88,10 @@ public class ReflectionUtils {
             if (methodName.startsWith("get")) {
                 return Character.toLowerCase(methodName.charAt(3)) + methodName.substring(4);
             }
-            return methodName;
+            if (methodName.startsWith("is")) {
+                return Character.toLowerCase(methodName.charAt(2)) + methodName.substring(3);
+            }
+            throw new SpecificationBuilderException("Only getter methods can be used on interface projections.");
         }
     }
 }

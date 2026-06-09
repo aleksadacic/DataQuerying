@@ -90,9 +90,9 @@ List<User> users = userRepository.findAll(query.buildSpecification());
 
 This library is compatible with:
 
-- **Spring Framework**: 6.2.2+
-- **Spring Boot**: 3.4.2+
-- **Java Version**: 17 - 23
+- **Spring Framework**: 6.2.19+
+- **Spring Boot**: 3.4.13+
+- **Java Version**: 17 - 25
 
 For more compatibility details
 visit [COMPATIBILITY.md](https://github.com/aleksadacic/DataQuerying/blob/master/COMPATIBILITY.md).
@@ -107,7 +107,7 @@ visit [COMPATIBILITY.md](https://github.com/aleksadacic/DataQuerying/blob/master
 <dependency>
     <groupId>dev.rosemarylab.dataquerying</groupId>
     <artifactId>DataQuerying</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.1</version>
 </dependency>
 ```
 
