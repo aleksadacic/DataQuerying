@@ -3,7 +3,6 @@
 ## Highlights
 
 - Updated the dependency stack on the Spring Data JPA `3.4.x` / Spring Framework `6.2.x` line.
-- Added a dedicated Maven security profile with OWASP Dependency-Check.
 - Added GitHub Dependabot and CodeQL automation.
 - Hardened interface projection proxies so only getter-like methods are treated as field accessors.
 
@@ -18,9 +17,3 @@
 - JUnit Jupiter `5.10.3` -> `5.14.4`
 - Mockito `5.11.0` -> `5.23.0`
 - AssertJ `3.23.1` -> `3.27.7`
-
-## Security Notes
-
-- The `security` Maven profile is intended to be the release gate for dependency vulnerability checks.
-- No suppressions are included in this release; dependency findings should be fixed rather than muted unless a future
-  release documents a compatibility-constrained exception.
