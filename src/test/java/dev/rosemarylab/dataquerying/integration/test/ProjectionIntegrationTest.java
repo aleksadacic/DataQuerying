@@ -10,6 +10,7 @@ import dev.rosemarylab.dataquerying.integration.repository.RoleRepository;
 import dev.rosemarylab.dataquerying.integration.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.JoinType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -82,7 +83,7 @@ class ProjectionIntegrationTest {
     @Test
     void testProjectionFindAllUsingSpecificationFactoryMethod() {
         // Manually create a specification filtering for role "ADMIN"
-        Specification<User> spec = (root, query, cb) -> cb.equal(root.get("role").get("name"), "ADMIN");
+        Specification<User> spec = (root, _, cb) -> cb.equal(root.get("role").get("name"), "ADMIN");
         // Use the Projection factory method with the specification
         List<UserDto> dtos = projectionFactory.create(User.class, UserDto.class)
                 .findAll(spec, Sort.by("name"), false);
@@ -93,15 +94,22 @@ class ProjectionIntegrationTest {
 
     @Test
     void testProjectionFindAllUsingExistingQueryFactoryMethod() {
-        // Create an initial query filtering for users with email "bob@example.com"
-        Query<User> initialQuery = Query.where("email", "bob@example.com");
+        // Create an initial query that produces duplicate rows for USER role members.
+        Query<User> initialQuery = Query.<User>where("role.name", "USER")
+                .join("role.users", JoinType.INNER);
         // Use the factory method to create a new query based on the existing one
         Query<User> queryFromExisting = Query.get(initialQuery);
-        // Use Projection with the new query (with sorting and distinct true)
-        List<UserDto> dtos = projectionFactory.create(User.class, UserDto.class)
+
+        List<UserDto> duplicatedDtos = projectionFactory.create(User.class, UserDto.class)
+                .findAll(queryFromExisting, Sort.by("name"), false);
+        List<UserDto> distinctDtos = projectionFactory.create(User.class, UserDto.class)
                 .findAll(queryFromExisting, Sort.by("name"), true);
-        // Expect only Bob to be returned
-        assertThat(dtos).hasSize(1);
-        assertThat(dtos.getFirst().getName()).isEqualTo("Bob");
+
+        assertThat(duplicatedDtos)
+                .extracting(UserDto::getName)
+                .containsExactly("Bob", "Bob", "Charlie", "Charlie");
+        assertThat(distinctDtos)
+                .extracting(UserDto::getName)
+                .containsExactly("Bob", "Charlie");
     }
 }

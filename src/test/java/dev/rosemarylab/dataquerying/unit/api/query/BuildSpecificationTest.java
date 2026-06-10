@@ -26,6 +26,14 @@ class BuildSpecificationTest extends FilterInclusionTest {
         assertNotNull(query);
         Specification<PersonEntity> spec = query.buildSpecification();
         assertNotNull(spec);
+
+        Predicate predicate = spec.toPredicate(root, criteriaQuery, criteriaBuilder);
+
+        assertNull(predicate, "Empty queries should not contribute any restrictions");
+        verifyNoInteractions(criteriaBuilder);
+        verifyNoInteractions(root);
+        verify(criteriaQuery, never()).where(any(Predicate.class));
+        verify(criteriaQuery, never()).where(any(Predicate[].class));
     }
 
     /**
@@ -34,8 +42,9 @@ class BuildSpecificationTest extends FilterInclusionTest {
      */
     @Test
     void testGetFromSpecification() {
-        // Create a dummy specification that always returns a conjunction predicate.
-        Specification<PersonEntity> dummySpec = (Root<PersonEntity> root, CriteriaQuery<?> query, CriteriaBuilder cb) ->
+        stubCriteriaQuery(criteriaQuery);
+
+        Specification<PersonEntity> dummySpec = (Root<PersonEntity> root, CriteriaQuery<?> _, CriteriaBuilder cb) ->
                 cb.equal(root.get("name"), "John");
         Query<PersonEntity> queryFromSpec = Query.get(dummySpec);
 
@@ -43,6 +52,12 @@ class BuildSpecificationTest extends FilterInclusionTest {
 
         Specification<PersonEntity> builtSpec = queryFromSpec.buildSpecification();
         assertNotNull(builtSpec, "Built specification should not be null");
+
+        verifyFilterInclusion(
+                builtSpec,
+                List.of(new FilterExpectation("name", SearchOperator.EQ, "John")),
+                CombinationLogic.NONE
+        );
     }
 
     /**
@@ -51,17 +66,21 @@ class BuildSpecificationTest extends FilterInclusionTest {
      */
     @Test
     void testGetFromQuery() {
-        // Build an original Query using one of the standard factory methods.
-        Query<PersonEntity> originalQuery = Query.where("name", "John");
-        // For example, Query.where(String, Object) uses an EQ operator internally.
+        stubCriteriaQuery(criteriaQuery);
 
-        // Now create a new Query by wrapping the original query.
+        Query<PersonEntity> originalQuery = Query.where("name", "John");
         Query<PersonEntity> queryFromQuery = Query.get(originalQuery);
 
         assertNotNull(queryFromQuery, "Query created from another query should not be null");
 
         Specification<PersonEntity> specFromQuery = queryFromQuery.buildSpecification();
         assertNotNull(specFromQuery, "Built specification from wrapped query should not be null");
+
+        verifyFilterInclusion(
+                specFromQuery,
+                List.of(new FilterExpectation("name", SearchOperator.EQ, "John")),
+                CombinationLogic.NONE
+        );
     }
 
     /**
@@ -70,7 +89,15 @@ class BuildSpecificationTest extends FilterInclusionTest {
     @Test
     void testWhereWithAttributeAndValue() {
         Query<PersonEntity> query = Query.where("name", "John");
-        assertNotNull(query.buildSpecification());
+        Specification<PersonEntity> spec = query.buildSpecification();
+
+        stubCriteriaQuery(criteriaQuery);
+
+        verifyFilterInclusion(
+                spec,
+                List.of(new FilterExpectation("name", SearchOperator.EQ, "John")),
+                CombinationLogic.NONE
+        );
     }
 
     /**
@@ -79,7 +106,15 @@ class BuildSpecificationTest extends FilterInclusionTest {
     @Test
     void testWhereWithAttributeOperatorValue() {
         Query<PersonEntity> query = Query.where("age", SearchOperator.GT, 18);
-        assertNotNull(query.buildSpecification());
+        Specification<PersonEntity> spec = query.buildSpecification();
+
+        stubCriteriaQuery(criteriaQuery);
+
+        verifyFilterInclusion(
+                spec,
+                List.of(new FilterExpectation("age", SearchOperator.GT, 18)),
+                CombinationLogic.NONE
+        );
     }
 
     /**
