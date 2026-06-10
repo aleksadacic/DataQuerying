@@ -85,7 +85,7 @@ class QueryIntegrationTest {
     @Test
     void testGetFromSpecification() {
         // Create a specification that filters users with name "Alice"
-        Specification<User> spec = (root, query, cb) -> cb.equal(root.get("name"), "Alice");
+        Specification<User> spec = (root, _, cb) -> cb.equal(root.get("name"), "Alice");
 
         // Create a new Query using the factory method with Specification
         Query<User> queryFromSpec = Query.get(spec);
