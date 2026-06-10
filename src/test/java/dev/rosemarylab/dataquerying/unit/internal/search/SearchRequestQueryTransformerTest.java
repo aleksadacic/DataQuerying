@@ -187,6 +187,13 @@ class SearchRequestQueryTransformerTest {
 
     @Test
     void testToQuery_nestedFilters() {
+        queryStaticMock.close();
+        queryStaticMock = Mockito.mockStatic(Query.class, Mockito.CALLS_REAL_METHODS);
+
+        Query<Object> topLevelQuerySpy = spy(Query.<Object>get());
+        Query<Object> nestedQuerySpy = spy(Query.<Object>get());
+        queryStaticMock.when(Query::get).thenReturn(topLevelQuerySpy, nestedQuerySpy);
+
         SearchRequest request = new SearchRequest();
         request.setConditionalOperator(ConditionalOperator.OR);
 
@@ -212,18 +219,14 @@ class SearchRequestQueryTransformerTest {
         Query<Object> result = SearchRequestQueryTransformer.toQuery(request);
 
         // Then
-        assertSame(querySpy, result);
+        assertSame(topLevelQuerySpy, result);
+        verify(topLevelQuerySpy).or(same(nestedQuerySpy));
 
-        // Because the top-level operator is OR, we expect: query.or(subQuery)
-        // But inside that subQuery, we do AND("name"=Alice) AND("active"=true)
-
-        // We can't directly see "subQuery" since it's ephemeral, but we can see the effect:
-        // 1) We expect one "or(...subQuery...)" call
-        // 2) That subQuery, internally, called and(...) for each leaf
-        verify(querySpy).or(argThat((Query<Object> innerQ) -> {
-            // We'll do a small spy on this subQuery or we can do a simpler approach:
-            // if we can't easily do an argument matcher, we at least confirm a single or(Query).
-            return true;
-        }));
+        // The nested AND group must be built on the child query before it is attached to the parent.
+        verify(nestedQuerySpy).and("name", SearchOperator.EQ, "Alice");
+        verify(nestedQuerySpy).and("active", SearchOperator.EQ, true);
+        verify(nestedQuerySpy, never()).or(anyString(), any(), any());
+        verify(nestedQuerySpy, never()).join(anyString(), any());
+        verify(nestedQuerySpy, never()).distinct();
     }
 }

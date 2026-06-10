@@ -4,15 +4,18 @@ import dev.rosemarylab.dataquerying.api.Query;
 import dev.rosemarylab.dataquerying.api.SearchOperator;
 import dev.rosemarylab.dataquerying.api.SearchRequest;
 import dev.rosemarylab.dataquerying.internal.enums.ConditionalOperator;
-import dev.rosemarylab.dataquerying.internal.enums.SortOrder;
 import dev.rosemarylab.dataquerying.internal.search.FilterData;
 import dev.rosemarylab.dataquerying.internal.search.OrderInfo;
 import dev.rosemarylab.dataquerying.internal.search.PageInfo;
+import dev.rosemarylab.dataquerying.unit.api.query.FilterInclusionTest;
+import dev.rosemarylab.dataquerying.internal.enums.SortOrder;
 import org.junit.jupiter.api.Test;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import dev.rosemarylab.dataquerying.utils.Dto;
+import org.springframework.data.jpa.domain.Specification;
+import dev.rosemarylab.dataquerying.utils.PersonEntity;
 
 import java.util.List;
 
@@ -22,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * We don't need to test if the Specification object is well instantiated because
  * Specification object is created from Query object, and we have tests that cover that also.
  */
-class SearchRequestTest {
+class SearchRequestTest extends FilterInclusionTest {
 
     @Test
     void testGetQuery_withNoFilters() {
@@ -31,10 +34,15 @@ class SearchRequestTest {
         // No filters, no operator set
 
         // When
-        Query<Dto> query = request.getQuery();
+        Query<PersonEntity> query = request.getQuery();
 
         // Then
         assertNotNull(query, "Query should not be null even with no filters");
+
+        Specification<PersonEntity> spec = query.buildSpecification();
+        assertNotNull(spec, "Specification should still be created for an empty request");
+        assertNull(spec.toPredicate(root, criteriaQuery, criteriaBuilder),
+                "Empty SearchRequest should produce no predicates");
     }
 
     @Test
@@ -56,10 +64,22 @@ class SearchRequestTest {
         request.setFilters(List.of(filter1, filter2));
 
         // When
-        Query<Dto> query = request.getQuery();
+        Query<PersonEntity> query = request.getQuery();
 
         // Then
         assertNotNull(query, "We should get a non-null Query");
+
+        Specification<PersonEntity> spec = query.buildSpecification();
+        Predicate finalPredicate = stubCriteriaQuery(criteriaQuery);
+
+        List<FilterExpectation> expectations = List.of(
+                new FilterExpectation("name", SearchOperator.EQ, "Alice"),
+                new FilterExpectation("age", SearchOperator.GT, 30)
+        );
+
+        verifyFilterInclusion(spec, expectations, CombinationLogic.AND);
+        assertSame(finalPredicate, spec.toPredicate(root, criteriaQuery, criteriaBuilder),
+                "SearchRequest#getQuery should preserve both filters and their AND combination");
     }
 
     @Test
