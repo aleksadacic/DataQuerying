@@ -190,8 +190,8 @@ class SearchRequestQueryTransformerTest {
         queryStaticMock.close();
         queryStaticMock = Mockito.mockStatic(Query.class, Mockito.CALLS_REAL_METHODS);
 
-        Query<Object> topLevelQuerySpy = spy(Query.<Object>get());
-        Query<Object> nestedQuerySpy = spy(Query.<Object>get());
+        Query<Object> topLevelQuerySpy = spy(Query.get());
+        Query<Object> nestedQuerySpy = spy(Query.get());
         queryStaticMock.when(Query::get).thenReturn(topLevelQuerySpy, nestedQuerySpy);
 
         SearchRequest request = new SearchRequest();
