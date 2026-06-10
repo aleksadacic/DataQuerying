@@ -145,7 +145,7 @@ public enum SearchOperator {
 A fluent builder for creating JPA `Specification<T>` objects.
 
 ```java
-Query<User> userQuery = Query.get()
+Query<User> userQuery = Query
         .where("email", SearchOperator.EQ, "test@example.com")
         .or("active", SearchOperator.EQ, true);
 

@@ -96,34 +96,50 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/aleksa
     - Click the Fork button in the top-right corner to create your copy of the repository.
   
 2. Clone Your Fork
+    - After forking the repository on GitHub, clone your fork locally, not the original `aleksadacic/DataQuerying` repository.
+    - Replace `<your-github-username>` with your GitHub username:
       ```bash
-      git clone https://github.com/aleksadacic/DataQuerying.git
+      git clone https://github.com/<your-github-username>/DataQuerying.git
       cd DataQuerying
       ```
+    - Add the original repository as `upstream` so you can keep your fork up to date:
+      ```bash
+      git remote add upstream https://github.com/aleksadacic/DataQuerying.git
+      ```
+
 3. Create a New Branch
-   - Use a descriptive name for your branch (e.g., feature/add-feature-x or bugfix/fix-issue-y):
+   - Use a short, descriptive branch name.
+   - Prefixes such as `feature/`, `fix/`, `docs/`, or `refactor/` are recommended, but not required.
     ```bash 
     git checkout -b feature/add-feature-x
     ```
 
 4. Make Your Changes
-   - Make sure your changes adhere to the project's coding standards.
-   - Add or update tests if applicable.
-   - Test your changes locally to ensure they work as expected.
+   - Keep changes focused on the problem you are solving.
+   - Follow the existing code style and structure of the project.
+   - Update documentation when your change affects public behavior, configuration, or usage examples.
+   - Add or update tests when they are needed to cover the behavior you changed.
 
-5. Commit Your Changes
-     - Write clear and concise commit messages:
+5. Verify Your Changes Locally
+   - This project is built with Maven and currently targets Java 25.
+   - Run the full test suite before opening a pull request:
+    ```bash
+    ./mvnw test
+    ```
+
+6. Commit Your Changes
+     - Write clear and concise commit messages that explain the intent of the change:
     ```bash 
     git add .
     git commit -m "Add feature X to improve Y"
     ```
 
-6. Push Your Branch to Your Fork
+7. Push Your Branch to Your Fork
       ```bash
       git push origin feature/add-feature-x
       ```
 
-7. Open a Pull Request
+8. Open a Pull Request
    1) Go to the original repository on GitHub.
    2) Click Pull Requests > New Pull Request. 
    3) Select your branch and provide a detailed description of your changes:
@@ -137,5 +153,4 @@ Before submitting your pull request, make sure you:
 - [ ] Have followed the coding style of the project.
 - [ ] Updated documentation (if applicable).
 - [ ] Added or updated tests (if applicable).
-- [ ] Ensured all tests pass (npm test, mvn test, etc., depending on the project).
-
+- [ ] Ensured `./mvnw test` passes locally.
