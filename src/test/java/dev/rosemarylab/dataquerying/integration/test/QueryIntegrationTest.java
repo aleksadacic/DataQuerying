@@ -164,11 +164,20 @@ class QueryIntegrationTest {
 
     @Test
     void testProjectionDistinct() {
-        // Suppose there are multiple users with the same role
-        Query<User> query = Query.<User>get().distinct().join("role", JoinType.INNER);
+        Query<User> duplicateProducingQuery = Query.<User>get().join("role.users", JoinType.INNER);
+        Query<User> distinctQuery = Query.<User>get().distinct().join("role.users", JoinType.INNER);
 
-        List<UserDto> results = Projection.create(entityManager, User.class, UserDto.class).findAll(query);
-        assertThat(results).hasSize(3);
+        List<UserDto> duplicatedResults = Projection.create(entityManager, User.class, UserDto.class)
+                .findAll(duplicateProducingQuery);
+        List<UserDto> distinctResults = Projection.create(entityManager, User.class, UserDto.class)
+                .findAll(distinctQuery);
+
+        assertThat(duplicatedResults)
+                .extracting(UserDto::getName)
+                .containsExactlyInAnyOrder("Alice", "Bob", "Bob", "Charlie", "Charlie");
+        assertThat(distinctResults)
+                .extracting(UserDto::getName)
+                .containsExactlyInAnyOrder("Alice", "Bob", "Charlie");
     }
 
     @Test
@@ -260,16 +269,21 @@ class QueryIntegrationTest {
 
     @Test
     void testRepositoryFetchDistinct() {
-        // Build a query to find distinct users based on roles
-        Query<User> query = Query.<User>get().distinct().join("role", JoinType.INNER);
+        Query<User> duplicateProducingQuery = Query.<User>get().join("role.users", JoinType.INNER);
+        Query<User> distinctQuery = Query.<User>get().distinct().join("role.users", JoinType.INNER);
 
-        // Use the repository to fetch data using the query
-        List<User> results = userRepository.findAll(query.buildSpecification());
+        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by("name"));
 
-        // Assert that all users are returned (distinct by role)
-        assertThat(results).hasSize(3);
-        assertThat(results).extracting(User::getName)
-                .containsExactlyInAnyOrder("Alice", "Bob", "Charlie");
+        Page<User> duplicatedResults = userRepository.findAll(duplicateProducingQuery.buildSpecification(), pageRequest);
+        Page<User> distinctResults = userRepository.findAll(distinctQuery.buildSpecification(), pageRequest);
+
+        // Hibernate already de-duplicates root entities for this repository query shape,
+        // so both paths expose the same unique users even though the join multiplies SQL rows.
+        assertThat(duplicatedResults.getTotalElements()).isEqualTo(3);
+        assertThat(distinctResults.getTotalElements()).isEqualTo(3);
+        assertThat(distinctResults.getContent())
+                .extracting(User::getName)
+                .containsExactly("Alice", "Bob", "Charlie");
     }
 
     @Test
